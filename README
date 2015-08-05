@@ -1,0 +1,30 @@
+***************************************************************
+* Vietnamese Text-to-Speech application for iHearTech project *
+***************************************************************
+Note:
+- Build with compiler support c++11
+- Regex patern online tester https://regex101.com 
+
+External library:
+- glib-2.0
+- google dense hash map (for UnitSelector module)
+
+Environment variable:
+- TTS_SYS_ROOT: point to TTS directory
+
+Configuration config.h:
+- Enable debug (build time)
+- Enable unittest
+- Enable unresolved word list
+
+Configuration logtrace.conf
+- Enable debug (runtime)
+- Log file location
+
+
+
+
+
+
+
+
