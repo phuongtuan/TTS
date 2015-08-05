@@ -1,1 +1,11 @@
 /Debug/
+messages
+*.wav
+*.mk
+*.d
+*.o
+*.a
+*.dat
+*.nml
+news.txt
+*.html
