@@ -13,6 +13,7 @@ const std::string UnitSelector::alpha_text[] = {"A", "BÊ", "XÊ", "ĐI", "E", "
 		"MỜ", "NỜ", "O", "BI", "QUI", "RỜ", "SỜ", "TÊ", "U", "VÊ", "ĐÚP LỜ VÊ", "ÍT", "Y", "DÉT"};
 
 UnitSelector::UnitSelector(){
+	this->_good = true;
 	// TODO Auto-generated constructor stub
 }
 
@@ -25,11 +26,16 @@ UnitSelector::~UnitSelector(){
 void UnitSelector::initMaps(){
 	DEBUG_INFO("Initializing hash maps...");
 	std::string TTS_SYS_ROOT(getenv("TTS_SYS_ROOT"));
+	if(TTS_SYS_ROOT.empty()){
+		DEBUG_FATAL("TTS_SYS_ROOT is not set");
+		return;
+	}
 	std::ifstream ifsUnitId(TTS_SYS_ROOT + TTS_UNIT_ID_PATH);
 	std::ifstream ifsUnitSel(TTS_SYS_ROOT + TTS_UNIT_SELECTOR_PATH);
 	std::ifstream ifsSpecial(TTS_SYS_ROOT + TTS_SPEC_PATH);
 	if(!(ifsUnitId.is_open()&&ifsUnitSel.is_open()&&ifsSpecial.is_open())){
 		DEBUG_ERROR("Cannot open TTS dictionary, return now");
+		this->_good = false;
 		return;
 	}
 	DEBUG_INFO("Initializing unit ID map...");
@@ -75,6 +81,7 @@ void UnitSelector::storeMaps(void){
 	// Serialize unit id map
 	if(!fpUnitId){
 		DEBUG_ERROR("Cannot load unit ID map data");
+		this->_good = false;
 		return;
 	}
 	this->unitIdMap.serialize(unitIdMapSerializer(),fpUnitId);
@@ -83,10 +90,12 @@ void UnitSelector::storeMaps(void){
 	FILE *fpUnitSel = fopen((TTS_SYS_ROOT + TTS_UNIT_SELECTOR_DAT).c_str(),"w");
 	if(!fpUnitSel){
 		DEBUG_ERROR("Cannot load unit map data");
+		this->_good = false;
 		return;
 	}
 	if(this->unitMap.empty()){
 		DEBUG_ERROR("Unit map uninitialized, run initMaps first!");
+		this->_good = false;
 		return;
 	}
 	this->unitMap.serialize(unitMapSerializer(), fpUnitSel);
@@ -99,6 +108,7 @@ void UnitSelector::storeMaps(void){
 	}
 	if(this->specMap.empty()){
 		DEBUG_ERROR("specMap uninitialized, run initMaps first!");
+		this->_good = false;
 		return;
 	}
 	this->specMap.serialize(specMapSerializer(), fpSpecDict);
@@ -107,11 +117,18 @@ void UnitSelector::storeMaps(void){
 
 void UnitSelector::restoreMaps(void){
 	DEBUG_INFO("Restoring hash maps");
-	std::string TTS_SYS_ROOT(getenv("TTS_SYS_ROOT"));
+	char *root = getenv("TTS_SYS_ROOT");
+	if(root == NULL){
+		printf("%sUnitSelector::restoreMaps: TTS_SYS_ROOT variable is not set\n"
+				"Abort operation...%s\n",KRED,KNRM);
+		return;
+	}
+	std::string TTS_SYS_ROOT(root);
 	FILE *fpUnitId = fopen((TTS_SYS_ROOT + TTS_UNIT_ID_DAT).c_str(),"r");
 	// De-serialize unit id map
 	if(!fpUnitId){
 		DEBUG_ERROR("Cannot load unit ID map data");
+		this->_good = false;
 		return;
 	}
 	this->unitIdMap.set_empty_key(std::string());
@@ -122,6 +139,7 @@ void UnitSelector::restoreMaps(void){
 	FILE *fpUnitSel = fopen((TTS_SYS_ROOT + TTS_UNIT_SELECTOR_DAT).c_str(), "r");
 	if(!fpUnitSel){
 		DEBUG_ERROR("Cannot load unit map data");
+		this->_good = false;
 		return;
 	}
 	this->unitMap.set_empty_key(this->default_key);
@@ -133,6 +151,7 @@ void UnitSelector::restoreMaps(void){
 	FILE *fpSpecDict  = fopen((TTS_SYS_ROOT + TTS_SPEC_DAT).c_str(), "r");
 	if(!fpSpecDict){
 		DEBUG_ERROR("Cannot load specMap.dat");
+		this->_good = false;
 		return;
 	}
 	this->specMap.set_empty_key(std::string());
@@ -164,11 +183,11 @@ void UnitSelector::createIdList(std::string str){
 		num_words = 0;
 		for(vector<string>::iterator itw = words.begin(); itw != words.end(); ++itw){
 			phrase += *itw;
-			if(phrase.empty())	// Blank space at string beginning cause an empty word
+			if(phrase.empty()){	// Blank space at string beginning cause an empty word
 				continue;		// just simply ignore and pass it
+			}
 			num_words++;
 			if((id = this->unitIdMap[phrase]) == 0){
-				//TODO: Bug detected !!!!!!
 				if(num_words == 1){
 					// Lets search in abbreviation dictionary
 					this->resolveAbbreWord(phrase);
@@ -180,6 +199,9 @@ void UnitSelector::createIdList(std::string str){
 				num_words = 0;
 			}else{
 				unit.key.id = id;
+				if((itw+1) == words.end()){
+					idList.push_back(unit);
+				}
 				phrase += " ";
 			}
 		}
@@ -240,11 +262,75 @@ std::vector<unit_t> UnitSelector::getIdList(){
 	return this->idList;
 }
 
+bool UnitSelector::good(void){
+	return this->_good;
+}
+
+void UnitSelector::createWavFile(std::string path){
+	DEBUG_INFO("Creating wave file %s", path.c_str());
+	std::string TTS_SYS_ROOT = getenv("TTS_SYS_ROOT");
+	if(TTS_SYS_ROOT.empty()){
+		DEBUG_FATAL("TTS_SYS_ROOT is not set");
+		return;
+	}
+	wav_header_t hwav;
+	this->initWavHeader(&hwav);
+
+	std::ofstream outputWav(path);
+	vector<unit_t>::iterator itu;
+	unsigned int segment_size, data_size = 0;
+	char *buffer;
+	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
+	for(itu = this->idList.begin(); itu != this->idList.end(); ++itu){
+		DEBUG_INFO("Concatenating segment {%s,%d,%d}",
+				itu->segment.filename, itu->segment.begin, itu->segment.end);
+		segment_size = (itu->segment.end - itu->segment.begin)*32;
+		if(segment_size < MAX_ALLOC_SIZE){
+			buffer = new char[segment_size];
+		}else{
+			DEBUG_INFO("Cannot allocate buffer size = %d", segment_size);
+			continue;
+		}
+		std::ifstream inputWav((TTS_SYS_ROOT + TTS_DATABASE_PATH + std::string(itu->segment.filename) + ".wav").c_str(),
+					std::ifstream::in);
+		if(inputWav.is_open()){
+			inputWav.seekg(itu->segment.begin*32 + 44);
+			inputWav.read(buffer, segment_size);
+			outputWav.write(buffer, segment_size);
+			data_size += segment_size;
+		}else{
+			DEBUG_ERROR("Cannot open file %s", itu->segment.filename);
+			this->_good = false;
+		}
+		delete[] buffer;
+		inputWav.close();
+		inputWav.clear();
+	}
+	hwav.sub_chunk2_size = data_size;
+	hwav.chunk_size = hwav.sub_chunk2_size + 36;
+	outputWav.seekp(0);
+	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
+	outputWav.close();
+	DEBUG_INFO("Created wave file %s", path.c_str());
+}
+
+void UnitSelector::outputUnresolvedListToFile(std::string path){
+#ifdef __LIST_UNRESOLVED_WORDS__
+	std::ofstream ofs(path);
+	vector<std::string>::iterator it;
+	for(it = this->unresolvedWord.begin(); it != this->unresolvedWord.end(); ++it){
+		ofs << *it << endl;
+	}
+#endif
+}
+
 void UnitSelector::resolveAbbreWord(string word){
+	DEBUG_INFO("Searching word in specMap: %s", word.c_str());
 	string phrase = this->specMap[word];
 	if(phrase.empty()){
 		// Spell every characters, send word to unresolved list for update
 		// TODO: Implement a smarter approach to spell words that haven't been indexed
+		DEBUG_WARNING("No matched word is found!");
 		this->spellWord(word);
 	}else{
 		this->searchPhrase(phrase);
@@ -264,25 +350,29 @@ void UnitSelector::spellWord(std::string word){
 #endif
 	for(string::iterator it = word.begin(); it != word.end(); ++it){
 		if((*it >= 'A')&&(*it <= 'Z'))
-			phrase += this->alpha_text[*it - 'A'];
+			phrase += this->alpha_text[*it - 'A'] + " ";
 	}
 	this->searchPhrase(phrase);
 }
 
 void UnitSelector::searchPhrase(std::string phrase){
 	vector<string> tokens;
-	unsigned int id = 0;
+	unsigned int id = 0, word_count = 0;
 	unit_t unit;
 	this->splitString(&tokens, &phrase, ' ');
 	phrase.clear();
 	for(vector<string>::iterator it = tokens.begin(); it != tokens.end(); ++it){
 		phrase += *it;
-		if((id =this->unitIdMap[phrase]) == 0){
+		word_count ++;
+		if((id = this->unitIdMap[phrase]) == 0){
+			if(word_count == 1) continue;
 			this->idList.push_back(unit);
 			phrase.clear();
+		}else {
+			unit.key.id = id;
+			phrase += " ";
 		}
-		unit.key.id = id;
-		phrase += " ";
+
 	}
 }
 
@@ -337,59 +427,6 @@ wav_header_t *UnitSelector::initWavHeader(wav_header_t *hwav){
 	return hwav;
 }
 
-void UnitSelector::createWavFile(std::string path){
-	DEBUG_INFO("Creating wave file %s", path.c_str());
-	std::string TTS_SYS_ROOT = getenv("TTS_SYS_ROOT");
-	if(TTS_SYS_ROOT.empty()){
-		DEBUG_FATAL("TTS_SYS_ROOT is not set");
-		return;
-	}
-	wav_header_t hwav;
-	this->initWavHeader(&hwav);
-	std::ifstream inputWav;
-	std::ofstream outputWav(path);
-	vector<unit_t>::iterator itu;
-	unsigned int segment_size, data_size = 0;
-	char *buffer;
-	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
-	for(itu = this->idList.begin(); itu != this->idList.end(); ++itu){
-		DEBUG_INFO("Concatenating segment {%s,%d,%d}",
-				itu->segment.filename, itu->segment.begin, itu->segment.end);
-		segment_size = (itu->segment.end - itu->segment.begin)*32;
-		if(segment_size < MAX_ALLOC_SIZE){
-			buffer = new char[segment_size];
-		}else{
-			DEBUG_INFO("Cannot allocate buffer size = %d", segment_size);
-			continue;
-		}
-		inputWav.open((TTS_SYS_ROOT + TTS_DATABASE_PATH + std::string(itu->segment.filename) + ".wav").c_str(),
-				std::ifstream::in);
-		if(inputWav.is_open()){
-			inputWav.seekg(itu->segment.begin*32);
-			inputWav.read(buffer, segment_size);
-			outputWav.write(buffer, segment_size);
-			data_size += segment_size;
-		}else{
-			DEBUG_ERROR("Cannot open file %s", itu->segment.filename);
-		}
-		delete[] buffer;
-		inputWav.close();
-	}
-	hwav.sub_chunk2_size = data_size;
-	hwav.chunk_size = hwav.sub_chunk2_size + 36;
-	outputWav.seekp(0);
-	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
-	outputWav.close();
-	DEBUG_INFO("Created wave file %s", path.c_str());
-}
 
-void UnitSelector::outputUnresolvedListToFile(std::string path){
-#ifdef __LIST_UNRESOLVED_WORDS__
-	std::ofstream ofs(path);
-	vector<std::string>::iterator it;
-	for(it = this->unresolvedWord.begin(); it != this->unresolvedWord.end(); ++it){
-		ofs << *it << endl;
-	}
-#endif
-}
+
 } /* namespace iHearTech */

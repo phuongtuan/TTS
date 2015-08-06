@@ -1,4 +1,6 @@
 /Debug/
+database/
+.settings/
 messages
 *.wav
 *.mk

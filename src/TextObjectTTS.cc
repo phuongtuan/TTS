@@ -40,14 +40,19 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 // Public methods
 //***********************************************************
 TextObjectTTS::TextObjectTTS(){
+	this->_good = true;
 }
 TextObjectTTS::~TextObjectTTS(){
 }
 // Interfaces
 void TextObjectTTS::normalize(){
+	DEBUG_INFO("Start normalize process");
+	if(this->inputStr.empty()){
+		DEBUG_ERROR("Input string is empty");
+		return;
+	}
 	int reti;
 	regex_t regex;
-	DEBUG_INFO("Start normalize process");
 	std::string temp;
 	regmatch_t pmatch[REGMATCH_MAX_SIZE];
 	// Upper case string
@@ -85,12 +90,22 @@ bool TextObjectTTS::getTextFromUrl(std::string url){
 	regex_t regex1, regex2;
 	regmatch_t pmatch[3];
 	this->inputStr.clear();
-	std::string TTS_SYS_ROOT(getenv("TTS_SYS_ROOT"));
+	char *root = getenv("TTS_SYS_ROOT");
+	if(root == NULL){
+		printf("%sTextObjectTTS::getTextFromUrl: TTS_SYS_ROOT variable is not set!\n"
+				"Abort operation...%s\n",KRED,KNRM);
+		return false;
+	}
+	std::string TTS_SYS_ROOT(root);
+	if(TTS_SYS_ROOT.empty()){
+		return false;
+	}
 	system(("wget -O $TTS_SYS_ROOT/news.html " + url + " 2> /dev/null").c_str());
 	std::ifstream ifs(TTS_SYS_ROOT + "news.html");
 	std::ofstream ofs(TTS_SYS_ROOT + "news.txt");
 	if(!ifs.is_open()){
 		DEBUG_ERROR("Error while download web page or permission denied");
+		this->_good = false;
 		return false;
 	}
 	std::string str((std::istreambuf_iterator<char>(ifs)),
@@ -99,6 +114,7 @@ bool TextObjectTTS::getTextFromUrl(std::string url){
 	res += regcomp(&regex2, "</p>", REG_EXTENDED);
 	if(res){
 		DEBUG_ERROR("Cannot compile regex pattern, return now.");
+		this->_good = false;
 		return false;
 	}
 	char *cptr = (char*)malloc(str.size());
@@ -122,6 +138,9 @@ bool TextObjectTTS::getTextFromUrl(std::string url){
 	return true;
 }
 
+bool TextObjectTTS::good(){
+	return this->_good;
+}
 //***********************************************************
 // Private methods
 //***********************************************************
@@ -472,4 +491,6 @@ inline regmatch_t* TextObjectTTS::search_pattern(char * pattern, regex_t* regex,
 	DEBUG_INFO("Found match expression at position %d",pmatch->rm_so);
 	return pmatch;
 }
+
+
 } /* namespace iHearTech */

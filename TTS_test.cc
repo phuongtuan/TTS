@@ -42,7 +42,6 @@ int main(int argc, char* argv[]){
 	std::ofstream ofs("/home/messier/news.nml");
 	TextObjectTTS a;
 	if(!a.getTextFromUrl("http://tuoitre.vn/tin/kinh-te/20150724/can-song-phang-voi-doanh-nghiep/782136.html")){
-		printf("Error: Cannot download web page\n");
 		return 1;
 	}
 	a.normalize();

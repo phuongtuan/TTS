@@ -20,7 +20,7 @@
 #include <config.h>
 #include <stdint.h>
 
-#define MAX_ALLOC_SIZE			100000
+#define MAX_ALLOC_SIZE			500000
 #define TTS_UNIT_ID_PATH		"/database/Dictionary/UnitID.txt"
 #define TTS_UNIT_SELECTOR_PATH	"/database/Dictionary/UnitSelector.txt"
 #define TTS_UNIT_ID_DAT			"/database/Dictionary/UnitID.dat"
@@ -215,9 +215,11 @@ public:
 	std::vector<unit_t> getIdList();
 	void createWavFile(std::string path);
 	void outputUnresolvedListToFile(std::string path);
+	bool good(void);
 #ifndef __UNITTEST__
 private:
 #endif
+	bool _good;
 	unit_key_t default_key = {0,0,0};
 	const static std::string alpha_text[];
 	dense_hash_map<std::string , unsigned int, hash_str, eqstr> unitIdMap;

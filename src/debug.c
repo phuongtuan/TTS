@@ -13,6 +13,11 @@
 // Comment out to disable debug when compile code
 #define CONFIG_FILE_RELATIVE_PATH	"/config/logtrace.conf"
 #define LOG_BUFFER_SIZE	1024
+
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+
 // Runtime option
 #ifdef __DEBUG__
 static bool DEBUG_ENABLE = false;
@@ -27,7 +32,12 @@ void tts_debug_init(){
 	char *buffer, *ptr, *path_to_logfile, *buffer_boundary;
 	unsigned int sz;
 	ptr = getenv("TTS_SYS_ROOT");
-	if(ptr != NULL){
+	if(ptr == NULL){
+		printf("%sERROR: TTS_SYS_ROOT variable is not set!\n",KRED);
+		printf("Please run command:\n\texport TTS_SYS_ROOT=/PATH/TO/TTS/ROOT/%s\n\n",KNRM);
+		DEBUG_ENABLE = false;
+		return;
+	}else{
 		TTS_SYS_ROOT = (char *)calloc(strlen(ptr)+1, sizeof(char));
 		strcpy(TTS_SYS_ROOT, ptr);
 		CONFIG_FILE_PATH = (char *)calloc(strlen(TTS_SYS_ROOT) + strlen(CONFIG_FILE_RELATIVE_PATH) + 1, sizeof(char));
@@ -76,7 +86,7 @@ void tts_debug_init(){
 }
 
 void tts_log(const char *date, const char *time, const char *severity,
-		     const char *file, const char *func, const int line,...){
+		const char *file, const char *func, const int line,...){
 #ifdef __DEBUG__
 	if(DEBUG_ENABLE){
 		FILE *log_file = fopen(LOG_FILE_PATH, "a");

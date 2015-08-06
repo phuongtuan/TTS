@@ -41,12 +41,14 @@ public:
 	void setInputStr(std::string str);
 	bool getTextFromUrl(std::string url);
 	std::string getOutputStr();
+	bool good(void);
 
 #ifndef __UNITTEST__		// Expose all methods if __UNITTEST__ is defined
 private:
 #endif
 	std::string inputStr;
 	std::string outputStr;
+	bool _good;
 	// Regex handle function
 	static std::string* normalize_date_1(std::string *src, regmatch_t *pmatch);
 	static std::string* normalize_date_2(std::string *src, regmatch_t *pmatch);
