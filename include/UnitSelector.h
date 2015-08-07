@@ -21,6 +21,8 @@
 #include <stdint.h>
 
 #define MAX_ALLOC_SIZE			500000
+#define MAX_WORD_IN_PHRASE		13
+
 #define TTS_UNIT_ID_PATH		"/database/Dictionary/UnitID.txt"
 #define TTS_UNIT_SELECTOR_PATH	"/database/Dictionary/UnitSelector.txt"
 #define TTS_UNIT_ID_DAT			"/database/Dictionary/UnitID.dat"

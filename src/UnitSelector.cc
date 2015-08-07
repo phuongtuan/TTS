@@ -165,44 +165,50 @@ void UnitSelector::restoreMaps(void){
 // that exist in unitIdMap is selected.
 void UnitSelector::createIdList(std::string str){
 	vector<string>::iterator its;
-	vector<string> words;
 	string phrase;
 	unit_t unit;
 	unsigned int id, num_words;
 	// Split input string into sentences
 	vector<string> sentence;
+	vector<string> words;
 	//TODO: Indicate end-of-sentence symbol for tokenizing, should be '\n' ??
+	sentence.clear();
 	this->splitString(&sentence, &str, '\n');
 	// Start searching each sentence
 	this->idList.clear();
 	for(its = sentence.begin(); its != sentence.end(); ++its){
 		// Split phrase into words
+		words.clear();
 		this->splitString(&words, &(*its), ' ');
 		// Search for longest phrase contents combination from "words"
-		phrase.clear();
 		num_words = 0;
-		for(vector<string>::iterator itw = words.begin(); itw != words.end(); ++itw){
-			phrase += *itw;
-			if(phrase.empty()){	// Blank space at string beginning cause an empty word
-				continue;		// just simply ignore and pass it
-			}
-			num_words++;
-			if((id = this->unitIdMap[phrase]) == 0){
-				if(num_words == 1){
-					// Lets search in abbreviation dictionary
-					this->resolveAbbreWord(phrase);
-				}else{
-					idList.push_back(unit);
-					itw--;
-				}
+		std::vector<string>::iterator itw = words.begin();
+		while(itw != words.end()){
+			int i;
+			if((itw + MAX_WORD_IN_PHRASE) < words.end()){
+				i = MAX_WORD_IN_PHRASE;
+			}else i = (words.end() - itw);
+			for( ;i > 0; i--){
 				phrase.clear();
-				num_words = 0;
+				for(int j = 0; j < i; j++){
+					phrase += *(itw + j) + " ";
+				}
+				phrase.erase(phrase.length()-1,1);
+				if(!phrase.empty()){
+					if((id = this->unitIdMap[phrase]) != 0){
+						itw += i;
+						break;
+					}
+				}
+			}
+			if(id == 0){
+				phrase.clear();
+				phrase += *itw;
+				this->resolveAbbreWord(phrase);
+				itw++;
 			}else{
 				unit.key.id = id;
-				if((itw+1) == words.end()){
-					idList.push_back(unit);
-				}
-				phrase += " ";
+				this->idList.push_back(unit);
 			}
 		}
 	}
@@ -268,35 +274,38 @@ bool UnitSelector::good(void){
 
 void UnitSelector::createWavFile(std::string path){
 	DEBUG_INFO("Creating wave file %s", path.c_str());
-	std::string TTS_SYS_ROOT = getenv("TTS_SYS_ROOT");
+	std::string TTS_SYS_ROOT(getenv("TTS_SYS_ROOT"));
 	if(TTS_SYS_ROOT.empty()){
 		DEBUG_FATAL("TTS_SYS_ROOT is not set");
 		return;
 	}
 	wav_header_t hwav;
 	this->initWavHeader(&hwav);
-
-	std::ofstream outputWav(path);
+	//std::ofstream outputWav(path);
+	FILE *outputWav = fopen(path.c_str(), "w+b");
 	vector<unit_t>::iterator itu;
 	unsigned int segment_size, data_size = 0;
 	char *buffer;
-	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
+	//outputWav.write((const char *)&hwav, sizeof(wav_header_t));
+	fwrite((const void *)&hwav, sizeof(wav_header_t), 1, outputWav);
 	for(itu = this->idList.begin(); itu != this->idList.end(); ++itu){
 		DEBUG_INFO("Concatenating segment {%s,%d,%d}",
 				itu->segment.filename, itu->segment.begin, itu->segment.end);
 		segment_size = (itu->segment.end - itu->segment.begin)*32;
 		if(segment_size < MAX_ALLOC_SIZE){
 			buffer = new char[segment_size];
+			memset(buffer, 0, segment_size);
 		}else{
 			DEBUG_INFO("Cannot allocate buffer size = %d", segment_size);
 			continue;
 		}
 		std::ifstream inputWav((TTS_SYS_ROOT + TTS_DATABASE_PATH + std::string(itu->segment.filename) + ".wav").c_str(),
-					std::ifstream::in);
+				std::ifstream::in);
 		if(inputWav.is_open()){
 			inputWav.seekg(itu->segment.begin*32 + 44);
 			inputWav.read(buffer, segment_size);
-			outputWav.write(buffer, segment_size);
+			//outputWav.write(buffer, segment_size);
+			fwrite(buffer, sizeof(char), segment_size, outputWav);
 			data_size += segment_size;
 		}else{
 			DEBUG_ERROR("Cannot open file %s", itu->segment.filename);
@@ -308,9 +317,12 @@ void UnitSelector::createWavFile(std::string path){
 	}
 	hwav.sub_chunk2_size = data_size;
 	hwav.chunk_size = hwav.sub_chunk2_size + 36;
-	outputWav.seekp(0);
-	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
-	outputWav.close();
+//	outputWav.seekp(0);
+//	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
+//	outputWav.close();
+	fseek(outputWav, 0, 0);
+	fwrite((const void *)&hwav, sizeof(wav_header_t), 1, outputWav);
+	fclose(outputWav);
 	DEBUG_INFO("Created wave file %s", path.c_str());
 }
 
@@ -326,6 +338,7 @@ void UnitSelector::outputUnresolvedListToFile(std::string path){
 
 void UnitSelector::resolveAbbreWord(string word){
 	DEBUG_INFO("Searching word in specMap: %s", word.c_str());
+	if(word.empty()) return;
 	string phrase = this->specMap[word];
 	if(phrase.empty()){
 		// Spell every characters, send word to unresolved list for update
@@ -333,6 +346,7 @@ void UnitSelector::resolveAbbreWord(string word){
 		DEBUG_WARNING("No matched word is found!");
 		this->spellWord(word);
 	}else{
+		phrase.erase(phrase.find('\r'), 1);
 		this->searchPhrase(phrase);
 	}
 }
@@ -348,6 +362,7 @@ void UnitSelector::spellWord(std::string word){
 		ofs.close();
 	}
 #endif
+	if(word.empty()) return;
 	for(string::iterator it = word.begin(); it != word.end(); ++it){
 		if((*it >= 'A')&&(*it <= 'Z'))
 			phrase += this->alpha_text[*it - 'A'] + " ";
@@ -357,22 +372,30 @@ void UnitSelector::spellWord(std::string word){
 
 void UnitSelector::searchPhrase(std::string phrase){
 	vector<string> tokens;
-	unsigned int id = 0, word_count = 0;
+	unsigned int id = 0;
 	unit_t unit;
+	if(phrase.empty()) return;
 	this->splitString(&tokens, &phrase, ' ');
 	phrase.clear();
-	for(vector<string>::iterator it = tokens.begin(); it != tokens.end(); ++it){
-		phrase += *it;
-		word_count ++;
-		if((id = this->unitIdMap[phrase]) == 0){
-			if(word_count == 1) continue;
-			this->idList.push_back(unit);
-			phrase.clear();
-		}else {
-			unit.key.id = id;
-			phrase += " ";
+	int i;
+	vector<string>::iterator it = tokens.begin();
+	if((it + MAX_WORD_IN_PHRASE) < tokens.end()){
+		i = MAX_WORD_IN_PHRASE;
+	}else i = tokens.end() - it;
+	for( ; i > 0; i--){
+		phrase.clear();
+		for(int j = 0; j < i; j++){
+			phrase += *(it + j) + " ";
 		}
-
+		phrase.erase(phrase.length()-1,1);
+		if(!phrase.empty()){
+			if((id = this->unitIdMap[phrase]) != 0){
+				it += i;
+				unit.key.id = id;
+				this->idList.push_back(unit);
+				break;
+			}
+		}
 	}
 }
 
