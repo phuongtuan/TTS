@@ -22,6 +22,7 @@
 
 #define MAX_ALLOC_SIZE			500000
 #define MAX_WORD_IN_PHRASE		13
+#define MAX_FILENAME_LENGTH		24
 
 #define TTS_UNIT_ID_PATH		"/database/Dictionary/UnitID.txt"
 #define TTS_UNIT_SELECTOR_PATH	"/database/Dictionary/UnitSelector.txt"
@@ -47,7 +48,7 @@ struct unit_key_t{
 	}
 };
 struct wav_segment_t{
-	char filename[24];		// Wav file contains unit
+	char filename[MAX_FILENAME_LENGTH];		// Wav file contains unit
 	unsigned int begin;		// Begin position in wav file
 	unsigned int end;		// End position in wav file
 	bool operator ==(const wav_segment_t &w1) const{
@@ -55,7 +56,6 @@ struct wav_segment_t{
 				(w1.begin == this->begin)&&
 				(w1.end == this->end);
 	}
-
 };
 struct unit_t{
 	unit_key_t key;

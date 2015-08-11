@@ -3,4 +3,5 @@
 
 #!/bin/bash
 echo Building TTS application...
+cd Debug/
 

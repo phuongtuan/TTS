@@ -167,7 +167,7 @@ void UnitSelector::createIdList(std::string str){
 	vector<string>::iterator its;
 	string phrase;
 	unit_t unit;
-	unsigned int id, num_words;
+	unsigned int id;
 	// Split input string into sentences
 	vector<string> sentence;
 	vector<string> words;
@@ -181,7 +181,6 @@ void UnitSelector::createIdList(std::string str){
 		words.clear();
 		this->splitString(&words, &(*its), ' ');
 		// Search for longest phrase contents combination from "words"
-		num_words = 0;
 		std::vector<string>::iterator itw = words.begin();
 		while(itw != words.end()){
 			int i;
@@ -194,6 +193,7 @@ void UnitSelector::createIdList(std::string str){
 					phrase += *(itw + j) + " ";
 				}
 				phrase.erase(phrase.length()-1,1);
+				id = 0;
 				if(!phrase.empty()){
 					if((id = this->unitIdMap[phrase]) != 0){
 						itw += i;
@@ -281,12 +281,10 @@ void UnitSelector::createWavFile(std::string path){
 	}
 	wav_header_t hwav;
 	this->initWavHeader(&hwav);
-	//std::ofstream outputWav(path);
 	FILE *outputWav = fopen(path.c_str(), "w+b");
 	vector<unit_t>::iterator itu;
 	unsigned int segment_size, data_size = 0;
 	char *buffer;
-	//outputWav.write((const char *)&hwav, sizeof(wav_header_t));
 	fwrite((const void *)&hwav, sizeof(wav_header_t), 1, outputWav);
 	for(itu = this->idList.begin(); itu != this->idList.end(); ++itu){
 		DEBUG_INFO("Concatenating segment {%s,%d,%d}",
@@ -304,7 +302,6 @@ void UnitSelector::createWavFile(std::string path){
 		if(inputWav.is_open()){
 			inputWav.seekg(itu->segment.begin*32 + 44);
 			inputWav.read(buffer, segment_size);
-			//outputWav.write(buffer, segment_size);
 			fwrite(buffer, sizeof(char), segment_size, outputWav);
 			data_size += segment_size;
 		}else{
@@ -317,9 +314,6 @@ void UnitSelector::createWavFile(std::string path){
 	}
 	hwav.sub_chunk2_size = data_size;
 	hwav.chunk_size = hwav.sub_chunk2_size + 36;
-//	outputWav.seekp(0);
-//	outputWav.write((const char *)&hwav, sizeof(wav_header_t));
-//	outputWav.close();
 	fseek(outputWav, 0, 0);
 	fwrite((const void *)&hwav, sizeof(wav_header_t), 1, outputWav);
 	fclose(outputWav);
@@ -358,7 +352,7 @@ void UnitSelector::spellWord(std::string word){
 	string TTS_SYS_ROOT(getenv("TTS_SYS_ROOT"));
 	if(!TTS_SYS_ROOT.empty()){
 		std::ofstream ofs(TTS_SYS_ROOT + TTS_UNRESOLVED_PATH);
-		ofs << word;
+		ofs << word << endl;
 		ofs.close();
 	}
 #endif
@@ -449,7 +443,5 @@ wav_header_t *UnitSelector::initWavHeader(wav_header_t *hwav){
 	hwav->chunk_size = 36;
 	return hwav;
 }
-
-
 
 } /* namespace iHearTech */

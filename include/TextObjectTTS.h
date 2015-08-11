@@ -65,7 +65,9 @@ private:
 	static std::string* normalize_cidis(std::string *src, regmatch_t *pmatch);
 	static std::string* normalize_addsp(std::string *src, regmatch_t *pmatch);
 	static std::string* normalize_rmduplicate(std::string *src, regmatch_t *pmatch);
-
+	static std::string* normalize_rmhtml(std::string *src, regmatch_t *pmatch);
+	static std::string* normalize_slash(std::string *src, regmatch_t *pmatch);
+	static std::string* normalize_degree(std::string *src, regmatch_t *pmatch);
 	// Util method
 	static std::string* normalize_uppercase(std::string *dst, std::string *src);
 	static std::string* normalize_3digits(std::string *dst, short num, short hnum);

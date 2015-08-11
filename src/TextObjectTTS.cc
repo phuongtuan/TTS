@@ -16,6 +16,7 @@ const char *TextObjectTTS::kh[] = {"", "NGÀN ", "TRIỆU ", "TỶ ", "NGÀN T�
 // CAUTION: This type of declaration can only be compiled with c++11 flag *
 //*************************************************************************
 std::vector<pattern_t> TextObjectTTS::regexPattern = {
+		{(char *)"(“|”|<EM>|</EM>|<SUP>|</SUP>|\302\240|\342\200\246|[.][.])", &normalize_rmhtml},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})-([[:digit:]]{1,2})-([[:digit:]]{4}) ?", &normalize_date_1},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})/([[:digit:]]{1,2})/([[:digit:]]{4}) ?", &normalize_date_1},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})[.]([[:digit:]]{1,2})[.]([[:digit:]]{4}) ?", &normalize_date_1},
@@ -23,13 +24,14 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"(TỪ |THÁNG )([[:digit:]]{1,2})[ ]?(-|ĐẾN)[ ]?([[:digit:]]{1,2})(\\.|\\/)([[:digit:]]{4}) ?", &normalize_date_3},
 		{(char *)"(THÁNG )?([[:digit:]]{1,2})(\\.|-|\\/)([[:digit:]]{4}) ?", &normalize_date_4},
 		{(char *)"(NGÀY |SÁNG |TRƯA |CHIỀU |TỐI |ĐÊM |KHUYA |HAI |BA |TƯ |NĂM |SÁU |BẢY |NHẬT |QUA |NAY )([[:digit:]]{1,2})[\\.\\/-]([[:digit:]]{1,2}) ?", &normalize_date_5},
-		{(char *)"([[:digit:]]{1,2})(H|G|:)([[:digit:]]{1,2})?( AM| PM)? ?", &normalize_time},
+		{(char *)"([[:digit:]]{1,2})(H|G|:)([[:digit:]ash]{1,2})?( AM| PM)? ?", &normalize_time},
 		{(char *)"([[:digit:]]+) ?(KG|G|MG|KM|M|CM|MM|UM|NM|HA)(2|3)?", &normalize_size},
+		{(char *)"([[:digit:]]+) O C",&normalize_degree},
 		{(char *)"([[:digit:]]+),([[:digit:]]+) ?", &normalize_numcomma},
 		{(char *)"[[:digit:]](\\.)[[:digit:]]", &normalize_numdot},
 		{(char *)"(\\$)?([[:digit:]]+)(\\$|%)? ?", &normalize_snum},
 		{(char *)"(^| )(TP|Q|H|P|X)\\.", &normalize_cidis},
-
+		{(char *)"/", &normalize_slash},
 		// These patterns should be at the end of this list
 		{(char *)"(,|;|:|\\(|\\)|\\.{3})", &normalize_addsp},
 		{(char *)"(\\.|!)", &normalize_punctuation},
@@ -399,6 +401,25 @@ std::string* TextObjectTTS::normalize_punctuation(std::string *src, regmatch_t *
 
 std::string* TextObjectTTS::normalize_addsp(std::string *src, regmatch_t *pmatch){
 	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, " $SP ");
+	return src;
+}
+
+std::string* TextObjectTTS::normalize_rmhtml(std::string *src, regmatch_t *pmatch){
+	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, " ");
+	return src;
+}
+
+std::string* TextObjectTTS::normalize_slash(std::string *src, regmatch_t *pmatch){
+	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, " MỘT ");
+	return src;
+}
+
+std::string* TextObjectTTS::normalize_degree(std::string *src, regmatch_t *pmatch){
+	int num;
+	std::string num_string;
+	num = atoi(src->c_str() + pmatch[1].rm_so);
+	normalize_number(&num_string, num);
+	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, num_string + " ĐỘ XÊ ");
 	return src;
 }
 

@@ -41,7 +41,8 @@ int main(int argc, char* argv[]){
 //				(std::istreambuf_iterator<char>()));
 	std::ofstream ofs("/home/messier/news.nml");
 	TextObjectTTS a;
-	if(!a.getTextFromUrl("http://tuoitre.vn/tin/kinh-te/20150724/can-song-phang-voi-doanh-nghiep/782136.html")){
+	//if(!a.getTextFromUrl("http://tuoitre.vn/tin/kinh-te/20150724/can-song-phang-voi-doanh-nghiep/782136.html")){
+	if(!a.getTextFromUrl("http://tuoitre.vn/tin/chinh-tri-xa-hoi/20150811/xay-dung-tphcm-thanh-noi-co-chat-luong-song-tot/899694.html")){
 		return 1;
 	}
 	a.normalize();
@@ -49,8 +50,9 @@ int main(int argc, char* argv[]){
 	UnitSelector b;
 	b.restoreMaps();
 	b.createIdList(a.getOutputStr());
-	b.outputIdListToFile("/home/messier/idlist");
+	//b.outputIdListToFile("/home/messier/idlist");
 	b.createWavFile("/home/messier/tts_out.wav");
+	//b.outputUnresolvedListToFile("/home/messier/unresolve_list.txt");
 	return 0;
 }
 
