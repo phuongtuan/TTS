@@ -24,7 +24,8 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"(TỪ |THÁNG )([[:digit:]]{1,2})[ ]?(-|ĐẾN)[ ]?([[:digit:]]{1,2})(\\.|\\/)([[:digit:]]{4}) ?", &normalize_date_3},
 		{(char *)"(THÁNG )?([[:digit:]]{1,2})(\\.|-|\\/)([[:digit:]]{4}) ?", &normalize_date_4},
 		{(char *)"(NGÀY |SÁNG |TRƯA |CHIỀU |TỐI |ĐÊM |KHUYA |HAI |BA |TƯ |NĂM |SÁU |BẢY |NHẬT |QUA |NAY )([[:digit:]]{1,2})[\\.\\/-]([[:digit:]]{1,2}) ?", &normalize_date_5},
-		{(char *)"([[:digit:]]{1,2})(H|G|:)([[:digit:]ash]{1,2})?( AM| PM)? ?", &normalize_time},
+		{(char *)"(THỨ |HẠNG |GIẢI )([[:digit:]]+)",&normalize_rank},
+		{(char *)"([[:digit:]]{1,2})(H|G|:)([[:digit:]]{1,2})?( AM| PM)? ?", &normalize_time},
 		{(char *)"([[:digit:]]+) ?(KG|G|MG|KM|M|CM|MM|UM|NM|HA)(2|3)?", &normalize_size},
 		{(char *)"([[:digit:]]+) O C",&normalize_degree},
 		{(char *)"([[:digit:]]+),([[:digit:]]+) ?", &normalize_numcomma},
@@ -38,6 +39,7 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"(“|”|-|\"|\\*)",&normalize_remove},
 		{(char *)"( {2,}|\n{2,})",&normalize_rmduplicate},
 };
+
 //***********************************************************
 // Public methods
 //***********************************************************
@@ -119,7 +121,8 @@ bool TextObjectTTS::getTextFromUrl(std::string url){
 		this->_good = false;
 		return false;
 	}
-	char *cptr = (char*)malloc(str.size());
+	//char *cptr = (char*)malloc(str.length() + 1);
+	char *cptr = new char[str.length() + 1];
 	strcpy(cptr, str.c_str());
 	char *ptr = cptr;
 	while(ptr < (cptr + str.size())){
@@ -134,7 +137,7 @@ bool TextObjectTTS::getTextFromUrl(std::string url){
 		ptr += pmatch[0].rm_eo;
 	}
 	ofs << this->inputStr;
-	free(cptr);
+	delete[] cptr;
 	remove((TTS_SYS_ROOT + "/news.html").c_str());
 	DEBUG_INFO("Store news content in file %s", (TTS_SYS_ROOT + "news.txt").c_str());
 	return true;
@@ -233,6 +236,22 @@ std::string* TextObjectTTS::normalize_date_5(std::string *src, regmatch_t *pmatc
 	temp.append(*normalize_number(&num_string, num));
 	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, temp);
 	DEBUG_INFO("Normalized string is %s", temp.c_str());
+	return src;
+}
+
+std::string* TextObjectTTS::normalize_rank(std::string *src, regmatch_t *pmatch){
+	DEBUG_INFO("normalized_rank is called");
+	std::string num_string;
+	int num;
+	num = atoi(src->c_str() + pmatch[2].rm_so);
+	if(num == 1){
+		src->replace(pmatch[2].rm_so, pmatch[2].rm_eo - pmatch[2].rm_so, "NHẤT");
+	}else if(num == 4){
+		src->replace(pmatch[2].rm_so, pmatch[2].rm_eo - pmatch[2].rm_so, "TƯ");
+	}else{
+		src->replace(pmatch[2].rm_so, pmatch[2].rm_eo - pmatch[2].rm_so,
+				*normalize_number(&num_string, num));
+	}
 	return src;
 }
 
@@ -362,8 +381,8 @@ std::string* TextObjectTTS::normalize_numcomma(std::string *src, regmatch_t *pma
 	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, temp);
 	DEBUG_INFO("Normalized string is %s", temp.c_str());
 	return src;
-
 }
+
 std::string* TextObjectTTS::normalize_numdot(std::string *src, regmatch_t *pmatch){
 	src->erase(pmatch[1].rm_so, 1);
 	return src;

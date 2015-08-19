@@ -17,6 +17,7 @@
 #include <glib.h>
 #include <vector>
 #include "config.h"
+#include <tr1/unordered_map>
 
 #define REGMATCH_MAX_SIZE	10
 
@@ -68,6 +69,7 @@ private:
 	static std::string* normalize_rmhtml(std::string *src, regmatch_t *pmatch);
 	static std::string* normalize_slash(std::string *src, regmatch_t *pmatch);
 	static std::string* normalize_degree(std::string *src, regmatch_t *pmatch);
+	static std::string* normalize_rank(std::string *src, regmatch_t *pmatch);
 	// Util method
 	static std::string* normalize_uppercase(std::string *dst, std::string *src);
 	static std::string* normalize_3digits(std::string *dst, short num, short hnum);
