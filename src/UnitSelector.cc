@@ -12,6 +12,8 @@ namespace iHearTech {
 const std::string UnitSelector::alpha_text[] = {"A", "BÊ", "XÊ", "ĐI", "E", "ÉP", "GI", "HẮC", "Y", "DI", "KA", "LỜ",
 		"MỜ", "NỜ", "O", "BI", "QUI", "RỜ", "SỜ", "TÊ", "U", "VÊ", "ĐÚP LỜ VÊ", "ÍT", "Y", "DÉT"};
 
+std::tr1::unordered_map<std::string, std::string> UnitSelector::unicode_map = UnitSelector::init_unicode_map();
+
 UnitSelector::UnitSelector(){
 	this->_good = true;
 	// TODO Auto-generated constructor stub
@@ -333,6 +335,18 @@ void UnitSelector::outputUnresolvedListToFile(std::string path){
 void UnitSelector::resolveAbbreWord(string word){
 	DEBUG_INFO("Searching word in specMap: %s", word.c_str());
 	if(word.empty()) return;
+	// Unicode character mapping
+	std::tr1::unordered_map<std::string, std::string>::iterator it;
+	for(it = this->unicode_map.begin(); it != this->unicode_map.end(); ++it){
+		std::size_t pos;
+		if((pos = word.find(it->first)) != std::string::npos){
+			DEBUG_INFO("Replace unicode character %s with %s", it->first.c_str(), it->second.c_str());
+			word.replace(pos, it->first.length(), it->second);
+			// Re-search in unit map
+			this->searchPhrase(word);
+			return;
+		}
+	}
 	string phrase = this->specMap[word];
 	if(phrase.empty()){
 		// Spell every characters, send word to unresolved list for update
@@ -442,6 +456,15 @@ wav_header_t *UnitSelector::initWavHeader(wav_header_t *hwav){
 	hwav->sub_chunk2_size = 0;
 	hwav->chunk_size = 36;
 	return hwav;
+}
+
+std::tr1::unordered_map<std::string, std::string> UnitSelector::init_unicode_map(){
+	std::tr1::unordered_map<std::string, std::string> map;
+	map["Ậ"] = "Ậ";
+	map["Ồ"] = "Ồ";
+	map["Ề"] = "Ề";
+	map["Ù"] = "Ù";
+	return map;
 }
 
 } /* namespace iHearTech */

@@ -222,6 +222,7 @@ public:
 private:
 #endif
 	bool _good;
+	static std::tr1::unordered_map<std::string, std::string> unicode_map;
 	unit_key_t default_key = {0,0,0};
 	const static std::string alpha_text[];
 	dense_hash_map<std::string , unsigned int, hash_str, eqstr> unitIdMap;
@@ -239,6 +240,7 @@ private:
 	void fillNeighborId(void);
 	void searchPhrase(std::string phrase);
 	static wav_header_t *initWavHeader(wav_header_t *hwav);
+	static std::tr1::unordered_map<std::string, std::string> init_unicode_map();
 };
 
 } /* namespace iHearTech */
