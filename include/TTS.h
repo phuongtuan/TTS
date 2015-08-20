@@ -10,6 +10,9 @@
 #include <string>
 #include <stdio.h>
 #include "TextObjectTTS.h"
+#include "debug.h"
+#include "TextObjectTTS.h"
+#include "UnitSelector.h"
 
 namespace iHearTech {
 
