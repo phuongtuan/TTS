@@ -1,9 +1,8 @@
-/Debug/
+Debug/
 database/
 .settings/
 messages
 *.wav
-*.mk
 *.d
 *.o
 *.a
@@ -14,3 +13,4 @@ news.txt
 TTS_test.cc
 .project
 .cproject
+bin/
