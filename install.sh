@@ -3,5 +3,9 @@
 
 #!/bin/bash
 echo Building TTS application...
-cd Debug/
+cd build/
+make clean
+make
+cd ..
+echo Finished
 
