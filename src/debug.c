@@ -36,6 +36,7 @@ void tts_debug_init(){
 		printf("%sERROR: TTS_SYS_ROOT variable is not set!\n",KRED);
 		printf("Please run command:\n\texport TTS_SYS_ROOT=/PATH/TO/TTS/ROOT/%s\n\n",KNRM);
 		DEBUG_ENABLE = false;
+		abort();
 		return;
 	}else{
 		TTS_SYS_ROOT = (char *)calloc(strlen(ptr)+1, sizeof(char));

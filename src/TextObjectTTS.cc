@@ -34,7 +34,7 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"(^| )(TP|Q|H|P|X)\\.", &normalize_cidis},
 		{(char *)"/", &normalize_slash},
 		// These patterns should be at the end of this list
-		{(char *)"(,|;|:|\\(|\\)|\\.{3})", &normalize_addsp},
+		{(char *)"(,|;|:|\\(|\\)|\\.{3}|\\?)", &normalize_addsp},
 		{(char *)"(\\.|!| \n)", &normalize_punctuation},
 		{(char *)"(“|”|-|\"|\\*)",&normalize_remove},
 		{(char *)"( {2,}|\n{2,})",&normalize_rmduplicate},

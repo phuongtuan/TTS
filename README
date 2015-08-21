@@ -7,7 +7,8 @@ Note:
 
 External library:
 - glib-2.0
-- google dense hash map (for UnitSelector module)
+- google sparsehash-2.0.2
+- alsa-lib-1.0.29
 
 Environment variable:
 - TTS_SYS_ROOT: point to TTS directory
