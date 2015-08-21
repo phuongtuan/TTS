@@ -10,7 +10,6 @@ messages
 *.nml
 news.txt
 *.html
-TTS_test.cc
 .project
 .cproject
 bin/
