@@ -13,3 +13,4 @@ news.txt
 *.html
 TTS_test.cc
 .project
+.cproject
