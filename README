@@ -2,25 +2,68 @@
 * Vietnamese Text-to-Speech application for iHearTech project *
 ***************************************************************
 Note:
-- Build with compiler support c++11
-- Regex patern online tester https://regex101.com 
+	- Build with compiler support c++11
+	- Regex patern online tester https://regex101.com 
 
 External library:
-- glib-2.0
-- google sparsehash-2.0.2
-- alsa-lib-1.0.29
+	- glib-2.0
+	- google sparsehash-2.0.2
+	- alsa-lib-1.0.29
 
 Environment variable:
-- TTS_SYS_ROOT: point to TTS directory
+	- TTS_SYS_ROOT: point to TTS directory
 
 Configuration config.h:
-- Enable debug (build time)
-- Enable unittest
-- Enable unresolved word list
+	- Enable debug (build time)
+	- Enable unittest
+	- Enable unresolved word list
 
 Configuration logtrace.conf
-- Enable debug (runtime)
-- Log file location
+	- Enable debug (runtime)
+	- Log file location
+
+Guide:
+	- Install gcc-4.7: 
+		sudo apt-get install python-software-properties
+		sudo add-apt-repository ppa:ubuntu-toolchain-r/test 
+		sudo apt-get update
+		sudo apt-get install gcc-4.7 g++-4.7
+		sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6 
+		sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.7 
+		sudo update-alternatives --config gcc
+	
+	- Install glib2.0: 
+		sudo apt-get install libglib2.0-dev
+	
+	- Install google sparsehash 
+		git clone https://github.com/google/sparsehash.git
+		cd sparsehash/
+		./configure
+		make
+		sudo make install
+		
+	- Install alsa-lib-1.0.29
+		wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.29.tar.bz2
+		tar -xf alsa-lib-1.0.29.tar.bz2
+		cd alsa-lib-1.0.29/
+		./configure
+		sudo make install
+	
+	- Use audio without root priviledge
+		sudo gpasswd -a [user] audio
+	
+	- Download and build TTS source code:
+		git clone tuanvu1992@https://bitbucket.org/tuanvu1992/iheartech-tts.git
+		cd iheartech-tts
+		./install.sh
+		
+	- Run TTS application:
+		export TTS_SYS_ROOT=/PATH/TO/TTS/DIR
+		cd bin/
+		./TTS
+		
+
+  
 
 
 
