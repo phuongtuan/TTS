@@ -20,11 +20,13 @@ class TTS {
 public:
 	TTS();
 	virtual ~TTS();
-	void sayText(char* text);
-	void sayUrl(char* url);
-	void outputWav(char* file_path);
+	void sayText(const char* text);
+	void sayUrl(const char* url);
+	void outputWav(const char* file_path);
 private:
-
+	iHearTech::UnitSelector *unit_sel;
+	iHearTech::TextObjectTTS *text_obj;
+	std::string TTS_SYS_ROOT;
 };
 
 } /* namespace iHearTech */
