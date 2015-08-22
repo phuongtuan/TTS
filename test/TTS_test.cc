@@ -44,19 +44,25 @@ int main(int argc, char* argv[]){
 	TextObjectTTS a;
 	//if(!a.getTextFromUrl("http://tuoitre.vn/tin/kinh-te/20150724/can-song-phang-voi-doanh-nghiep/782136.html")){
 	//if(!a.getTextFromUrl("http://tuoitre.vn/tin/phap-luat/20150811/bat-giam-4-can-bo-sai-pham-den-bu-giai-phong-mat-bang/947259.html")){
+	printf("Downloading webpage...\n");
 	if(!a.getTextFromUrl("http://tuoitre.vn/tin/thu-phi-xe-may-khong-hieu-qua/955743.html")){
 		return 1;
 	}
+	printf("Normalizing...\n");
 	a.normalize();
 	ofs << a.getOutputStr();
 	UnitSelector b;
-	//b.restoreMaps();
-	b.initMaps();
-	b.storeMaps();
+	printf("Restoring maps...\n");
+	b.restoreMaps();
+	//b.initMaps();
+	//b.storeMaps();
+	printf("Creating ID list...\n");
 	b.createIdList(a.getOutputStr());
 	//b.outputIdListToFile("/home/messier/idlist");
+	printf("Create wav file...\n");
 	b.createWavFile(TTS_SYS_ROOT+"/tts_out.wav");
 	//b.outputUnresolvedListToFile("/home/messier/unresolve_list.txt");
+	printf("Playing wav file...\n");
 	FILE *wav_file = fopen((TTS_SYS_ROOT+"/tts_out.wav").c_str(), "r+b");
 	Sound::play(wav_file);
 	fclose(wav_file);
