@@ -31,6 +31,34 @@ Sound::~Sound() {
 }
 
 int Sound::play(FILE *wav_file){
+	if(wav_file == NULL) return -1;
+	return Sound::play_file(wav_file);
+}
+
+int Sound::play(std::string file_path){
+	FILE *wav_file;
+	int ret;
+	if((wav_file = fopen(file_path.c_str(), "r+b")) == NULL){
+		return -1;
+	}
+	ret = Sound::play_file(wav_file);
+	fclose(wav_file);
+	return ret;
+}
+
+int Sound::play(const char* file_path){
+	FILE *wav_file;
+	int ret;
+	if((wav_file = fopen(file_path, "r+b")) == NULL){
+		return -1;
+	}
+	ret = Sound::play_file(wav_file);
+	fclose(wav_file);
+	return ret;
+}
+
+
+int Sound::play_file(FILE *wav_file){
 	DEBUG_INFO("Playing wav file");
 	snd_pcm_t *handle;
 	int err;
@@ -82,6 +110,7 @@ int Sound::play(FILE *wav_file){
 	free(samples);
 	return 0;
 }
+
 int Sound::set_hwparams(snd_pcm_t *handle,
 		snd_pcm_hw_params_t *params,
 		snd_pcm_access_t access)

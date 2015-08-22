@@ -9,6 +9,7 @@
 #define SOUND_H_
 #include <alsa/asoundlib.h>
 #include <stdio.h>
+#include <string>
 #define BUFFER_SIZE 	16*1024
 namespace iHearTech {
 
@@ -17,10 +18,13 @@ public:
 	Sound();
 	virtual ~Sound();
 	static int play(FILE *wav_file);
+	static int play(std::string file_path);
+	static int play(const char *file_path);
 	static int init();
 	static int set_hwparams(snd_pcm_t *handle, snd_pcm_hw_params_t *params, snd_pcm_access_t access);
 	static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams);
 private:
+	static int play_file(FILE *wav_file);
 	static char *device;					/* playback device */
 	static snd_pcm_format_t format;			/* sample format */
 	static unsigned int rate;				/* stream rate */
