@@ -20,7 +20,7 @@
 
 // Runtime option
 #ifdef __DEBUG__
-static bool DEBUG_ENABLE = false;
+bool DEBUG_ENABLE = false;
 static char *LOG_FILE_PATH = NULL;
 static char *TTS_SYS_ROOT = NULL;
 static char *CONFIG_FILE_PATH = NULL;

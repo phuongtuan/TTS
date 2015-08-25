@@ -33,8 +33,8 @@ void TTS::sayText(const char* text){
 	text_obj->setInputStr(std::string(text));
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
-	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_wav.wav");
-	Sound::play(TTS_SYS_ROOT + "/tts_wav.wav");
+	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
+	Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
 }
 
 void TTS::sayUrl(const char* url){
@@ -44,8 +44,8 @@ void TTS::sayUrl(const char* url){
 	text_obj->getTextFromUrl(std::string(url));
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
-	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_wav.wav");
-	Sound::play(TTS_SYS_ROOT + "/tts_wav.wav");
+	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
+	Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
 }
 
 void TTS::sayUrl(const std::string url){
@@ -53,8 +53,8 @@ void TTS::sayUrl(const std::string url){
 	text_obj->getTextFromUrl(url);
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
-	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_wav.wav");
-	Sound::play(TTS_SYS_ROOT + "/tts_wav.wav");
+	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
+	Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
 }
 
 void TTS::sayFile(FILE* pFile){

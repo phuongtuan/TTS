@@ -12,8 +12,8 @@
 #include "debug.h"
 #include "TTS.h"
 #include <getopt.h>
-#include <alsa/asoundlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 using namespace iHearTech;
 using namespace std;
@@ -24,20 +24,23 @@ void initializeComponent(){
 	strcat(current_path, "/../");
 	setenv("TTS_SYS_ROOT", current_path, 0);
 	DEBUG_INIT();
+	free(current_path);
 }
 
 void print_help(){
-	printf("Usage: TTS [OPTION]... [FILE]...\n"
+	printf("Usage: TTS [OPTION]... [FILE|URL]...\n"
 			"-h, --help          help\n"
 			"-v, --version       print current version\n"
 			"-u, --url           say text from URL\n"
 			"-t, --text          say text file\n"
 			"-o, --output        set output .wav file path\n"
+			"-d, --debug         1: Enable debug\n"
+			"                    0: Disable debug\n"
 			"\n");
 }
 
 void print_version(){
-	printf("iHearTech Text-to-Speech Application v%d.%d.%d\n\n", TTS_VERSION_MAJOR,
+	printf("iHearTech Vietnamese Text-to-Speech v%d.%d.%d\n\n", TTS_VERSION_MAJOR,
 				TTS_VERSION_MINOR, TTS_VERSION_SUBMINOR);
 }
 
@@ -50,6 +53,7 @@ int main(int argc, char* argv[]){
 		{"url", 1, NULL, 'u'},
 		{"text", 1, NULL, 't'},
 		{"output", 1, NULL, 'o'},
+		{"debug", 0, NULL, 'd'},
 		{NULL, 0, NULL, 0},
 	};
 	int more_help = 0;
@@ -59,7 +63,7 @@ int main(int argc, char* argv[]){
 	std::string output_path = std::string(getenv("TTS_SYS_ROOT")) + "/tts_out.wav";
 	while(1){
 		int c;
-		if((c = getopt_long(argc, argv, "hvu:t:o:", long_option, NULL)) < 0){
+		if((c = getopt_long(argc, argv, "hvu:t:o:d:", long_option, NULL)) < 0){
 			break;
 		}
 		switch(c){
@@ -77,6 +81,10 @@ int main(int argc, char* argv[]){
 			break;
 		case 'o':
 			if(optarg != NULL) output_path = std::string(optarg);
+			break;
+		case 'd':
+			if(*optarg == '0') DEBUG_ENABLE = false;
+			else DEBUG_ENABLE = true;
 			break;
 		}
 	}

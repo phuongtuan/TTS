@@ -24,6 +24,7 @@
 #define KWHT  "\x1B[37m"
 
 extern "C" {
+extern bool DEBUG_ENABLE;
 void tts_debug_init();
 void tts_log(const char *date, const char *time, const char *severity, const char *file,
 			 const char *func, const int line,...);
