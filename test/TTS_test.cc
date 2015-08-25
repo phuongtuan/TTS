@@ -8,19 +8,21 @@
 #define TTS_VERSION_MINOR		0
 #define TTS_VERSION_SUBMINOR	1
 
-
 #include "TTS.h"
 #include "debug.h"
 #include "TTS.h"
 #include <getopt.h>
 #include <alsa/asoundlib.h>
+#include <stdio.h>
 
 using namespace iHearTech;
 using namespace std;
 
-
-
 void initializeComponent(){
+	char *current_path = (char*)calloc(512, sizeof(char));
+	getcwd(current_path, 512);
+	strcat(current_path, "/../");
+	setenv("TTS_SYS_ROOT", current_path, 0);
 	DEBUG_INIT();
 }
 
