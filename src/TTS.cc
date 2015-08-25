@@ -14,7 +14,6 @@ namespace iHearTech {
 
 TTS::TTS() {
 	// TODO Auto-generated constructor stub
-	DEBUG_INIT();
 	this->text_obj = new TextObjectTTS();
 	this->unit_sel = new UnitSelector();
 	unit_sel->restoreMaps();
@@ -28,6 +27,9 @@ TTS::~TTS() {
 }
 
 void TTS::sayText(const char* text){
+	if(text == NULL){
+		return;
+	}
 	text_obj->setInputStr(std::string(text));
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
