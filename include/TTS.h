@@ -22,6 +22,10 @@ public:
 	virtual ~TTS();
 	void sayText(const char* text);
 	void sayUrl(const char* url);
+	void sayUrl(const std::string url);
+	void sayFile(const char *file_path);
+	void sayFile(const std::string file_path);
+	void sayFile(FILE *pFile);
 	void outputWav(const char* file_path);
 private:
 	iHearTech::UnitSelector *unit_sel;

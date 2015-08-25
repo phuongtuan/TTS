@@ -464,6 +464,7 @@ std::tr1::unordered_map<std::string, std::string> UnitSelector::init_unicode_map
 	map["Ồ"] = "Ồ";
 	map["Ề"] = "Ề";
 	map["Ù"] = "Ù";
+	map["Ỳ"] = "Ì";
 	return map;
 }
 
