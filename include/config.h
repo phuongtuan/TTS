@@ -15,5 +15,6 @@
 //#define __UNITTEST__
 
 // Uncomment to list all unresolved word
-//#define __LIST_UNRESOLVED_WORDS__
+#define __LIST_UNRESOLVED_WORDS__
+
 #endif /* CONFIG_H_ */

@@ -37,6 +37,7 @@ using namespace std::tr1;
 using google::dense_hash_map;
 
 namespace iHearTech {
+
 struct unit_key_t{
 	unsigned int id;
 	unsigned int id_left;
@@ -218,6 +219,7 @@ public:
 	void createWavFile(std::string path);
 	void outputUnresolvedListToFile(std::string path);
 	bool good(void);
+	bool enable_unresolved_words_output;
 #ifndef __UNITTEST__
 private:
 #endif

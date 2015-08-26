@@ -14,6 +14,7 @@ namespace iHearTech {
 
 TTS::TTS() {
 	// TODO Auto-generated constructor stub
+	this->play_enable = true;
 	this->text_obj = new TextObjectTTS();
 	this->unit_sel = new UnitSelector();
 	unit_sel->restoreMaps();
@@ -34,7 +35,7 @@ void TTS::sayText(const char* text){
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
 	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
-	Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
+	if(play_enable) Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
 }
 
 void TTS::sayUrl(const char* url){
@@ -45,7 +46,7 @@ void TTS::sayUrl(const char* url){
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
 	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
-	Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
+	if(play_enable) Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
 }
 
 void TTS::sayUrl(const std::string url){
@@ -54,7 +55,7 @@ void TTS::sayUrl(const std::string url){
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
 	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
-	Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
+	if(play_enable) Sound::play(TTS_SYS_ROOT + "/tts_out.wav");
 }
 
 void TTS::sayFile(FILE* pFile){
@@ -79,6 +80,17 @@ void TTS::sayFile(const std::string file_path){
 	if(file_path.size() == 0) return;
 	TTS::sayFile(file_path.c_str());
 }
+
+void TTS::outputUnresolvedList(std::string file_path){
+	DEBUG_INFO("Output unresolved word list to file: %s", file_path.c_str());
+	if(unit_sel != NULL){
+		unit_sel->enable_unresolved_words_output = true;
+		unit_sel->outputUnresolvedListToFile(file_path);
+	}else{
+		DEBUG_ERROR("Un-initialized unit selector object!");
+	}
+}
+
 } /* namespace iHearTech */
 
 

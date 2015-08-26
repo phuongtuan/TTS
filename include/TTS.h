@@ -27,6 +27,8 @@ public:
 	void sayFile(const std::string file_path);
 	void sayFile(FILE *pFile);
 	void outputWav(const char* file_path);
+	void outputUnresolvedList(std::string file_path);
+	bool play_enable;
 private:
 	iHearTech::UnitSelector *unit_sel;
 	iHearTech::TextObjectTTS *text_obj;

@@ -16,6 +16,7 @@ std::tr1::unordered_map<std::string, std::string> UnitSelector::unicode_map = Un
 
 UnitSelector::UnitSelector(){
 	this->_good = true;
+	this->enable_unresolved_words_output = false;
 	// TODO Auto-generated constructor stub
 }
 
@@ -324,10 +325,17 @@ void UnitSelector::createWavFile(std::string path){
 
 void UnitSelector::outputUnresolvedListToFile(std::string path){
 #ifdef __LIST_UNRESOLVED_WORDS__
-	std::ofstream ofs(path);
-	vector<std::string>::iterator it;
-	for(it = this->unresolvedWord.begin(); it != this->unresolvedWord.end(); ++it){
-		ofs << *it << endl;
+	if(this->enable_unresolved_words_output){
+		FILE *pFile = fopen(path.c_str(), "w");
+		if(pFile == NULL){
+			DEBUG_ERROR("Cannot open file: %s", path.c_str());
+			return;
+		}
+		std::vector<std::string>::iterator it;
+		for(it = this->unresolvedWord.begin(); it != this->unresolvedWord.end(); ++it){
+			fprintf(pFile, "Unresolved word:\t%s\n", it->c_str());
+		}
+		fclose(pFile);
 	}
 #endif
 }
@@ -362,12 +370,8 @@ void UnitSelector::resolveAbbreWord(string word){
 void UnitSelector::spellWord(std::string word){
 	string phrase;
 #ifdef __LIST_UNRESOLVED_WORDS__
-	this->unresolvedWord.push_back(word);
-	string TTS_SYS_ROOT(getenv("TTS_SYS_ROOT"));
-	if(!TTS_SYS_ROOT.empty()){
-		std::ofstream ofs(TTS_SYS_ROOT + TTS_UNRESOLVED_PATH);
-		ofs << word << endl;
-		ofs.close();
+	if(this->enable_unresolved_words_output){
+		this->unresolvedWord.push_back(word);
 	}
 #endif
 	if(word.empty()) return;
