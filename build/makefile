@@ -43,11 +43,9 @@ all: TTS
 
 # Tool invocations
 TTS: $(OBJS) $(USER_OBJS)
-	@echo 'Building target: $@'
-	@echo 'Invoking: Cross G++ Linker'
-	g++  -o "$(TOP_DIR)/test/TTS" $(OBJS) $(USER_OBJS) $(LIBS)
-	@echo 'Finished building target: $@'
-	@echo ' '
+	@echo '  CXX        $@'	
+	@g++  -o "$(TOP_DIR)/test/TTS" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Success!'	
 
 # Other Targets
 clean:
