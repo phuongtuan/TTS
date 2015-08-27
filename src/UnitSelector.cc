@@ -331,6 +331,7 @@ void UnitSelector::outputUnresolvedListToFile(std::string path){
 			DEBUG_ERROR("Cannot open file: %s", path.c_str());
 			return;
 		}
+		fprintf(pFile, "Unresolved word list %s\n", __DATE__);
 		std::vector<std::string>::iterator it;
 		for(it = this->unresolvedWord.begin(); it != this->unresolvedWord.end(); ++it){
 			fprintf(pFile, "Unresolved word:\t%s\n", it->c_str());
@@ -368,12 +369,12 @@ void UnitSelector::resolveAbbreWord(string word){
 }
 
 void UnitSelector::spellWord(std::string word){
-	string phrase;
 #ifdef __LIST_UNRESOLVED_WORDS__
 	if(this->enable_unresolved_words_output){
 		this->unresolvedWord.push_back(word);
 	}
 #endif
+	string phrase;
 	if(word.empty()) return;
 	for(string::iterator it = word.begin(); it != word.end(); ++it){
 		if((*it >= 'A')&&(*it <= 'Z'))

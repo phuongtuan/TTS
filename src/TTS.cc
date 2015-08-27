@@ -91,6 +91,13 @@ void TTS::outputUnresolvedList(std::string file_path){
 	}
 }
 
+void TTS::enableUnresolvedList(bool enable){
+	if(unit_sel != NULL){
+		if(enable) unit_sel->enable_unresolved_words_output = true;
+		else unit_sel->enable_unresolved_words_output = false;
+	}
+}
+
 } /* namespace iHearTech */
 
 

@@ -96,7 +96,10 @@ int main(int argc, char* argv[]){
 			else DEBUG_ENABLE = true;
 			break;
 		case 'r':
-			if(optarg != NULL) unresolved_output_path = std::string(optarg);
+			if(optarg != NULL){
+				tts.enableUnresolvedList(true);
+				unresolved_output_path = std::string(optarg);
+			}
 			break;
 		case 'p':
 			if(*optarg == '0') tts.play_enable = false;
@@ -126,3 +129,4 @@ int main(int argc, char* argv[]){
 	}
 	return 0;
 }
+
