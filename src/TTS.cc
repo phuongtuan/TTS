@@ -42,7 +42,7 @@ void TTS::sayUrl(const char* url){
 	if(url == NULL){
 		return;
 	}
-	text_obj->getTextFromUrl(std::string(url));
+	if(!text_obj->getTextFromUrl(url)) return;
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
 	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
@@ -50,8 +50,8 @@ void TTS::sayUrl(const char* url){
 }
 
 void TTS::sayUrl(const std::string url){
-	if(url.size() == 0) return;
-	text_obj->getTextFromUrl(url);
+	if(url.empty()) return;
+	if(!text_obj->getTextFromUrl(url)) return;
 	text_obj->normalize();
 	unit_sel->createIdList(text_obj->getOutputStr());
 	unit_sel->createWavFile(TTS_SYS_ROOT + "/tts_out.wav");
@@ -77,7 +77,7 @@ void TTS::sayFile(const char *file_path){
 }
 
 void TTS::sayFile(const std::string file_path){
-	if(file_path.size() == 0) return;
+	if(file_path.empty()) return;
 	TTS::sayFile(file_path.c_str());
 }
 

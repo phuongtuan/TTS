@@ -114,6 +114,11 @@ bool TextObjectTTS::getTextFromUrl(std::string url){
 	}
 	std::string str((std::istreambuf_iterator<char>(ifs)),
 			(std::istreambuf_iterator<char>()));
+	if(str.empty()){
+		DEBUG_ERROR("HTML file is empty");
+		printf("%sGo fuck yourself! Damn URL...%s",KRED,KNRM);
+		return false;
+	}
 	res += regcomp(&regex1, "((<p class=\"MsoNormal\">(<[^<>]>)*)|<p>|(<p class=\"txt-head\">TT - )|<p class=\"txt-head\">TTO - )([[:alnum:]]|Ă|Â|Ê|Ơ|Ô|Ư|Đ|[\"])", REG_EXTENDED);
 	res += regcomp(&regex2, "</p>", REG_EXTENDED);
 	if(res){

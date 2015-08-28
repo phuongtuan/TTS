@@ -167,29 +167,41 @@ void UnitSelector::restoreMaps(void){
 // sentence) and then then tokenized into words. The longest word combination
 // that exist in unitIdMap is selected.
 void UnitSelector::createIdList(std::string str){
+	DEBUG_INFO("Creating ID list");
 	vector<string>::iterator its;
 	string phrase;
 	unit_t unit;
 	unsigned int id;
-	// Split input string into sentences
+	/*
+	 * Split input string into sentences
+	 * TODO: Indicate end-of-sentence symbol for tokenizing, should be '\n' ??
+	 */
+	DEBUG_INFO("Slit input text into sentences");
 	vector<string> sentence;
 	vector<string> words;
-	//TODO: Indicate end-of-sentence symbol for tokenizing, should be '\n' ??
 	sentence.clear();
 	this->splitString(&sentence, &str, '\n');
-	// Start searching each sentence
+	/*
+	 * Start searching each sentence
+	 */
 	this->idList.clear();
 	for(its = sentence.begin(); its != sentence.end(); ++its){
-		// Split phrase into words
+		/*
+		 * Split phrase into words
+		 */
+		DEBUG_INFO("Split sentence into words");
 		words.clear();
 		this->splitString(&words, &(*its), ' ');
-		// Search for longest phrase contents combination from "words"
+		/*
+		 * Search for longest phrase contents combination from 'words'
+		 */
 		std::vector<string>::iterator itw = words.begin();
 		while(itw != words.end()){
 			int i;
 			if((itw + MAX_WORD_IN_PHRASE) < words.end()){
 				i = MAX_WORD_IN_PHRASE;
 			}else i = (words.end() - itw);
+			DEBUG_INFO("Searching phrase with maximum length = %d", i);
 			for( ;i > 0; i--){
 				phrase.clear();
 				for(int j = 0; j < i; j++){
@@ -210,13 +222,17 @@ void UnitSelector::createIdList(std::string str){
 				this->resolveAbbreWord(phrase);
 				itw++;
 			}else{
+				DEBUG_INFO("Longest phrase found, id = %d", id);
 				unit.key.id = id;
 				this->idList.push_back(unit);
 			}
 		}
 	}
-	// All phrase-id have been found, wave segment of each unit is select
-	// from the unitMap base on left and right unit
+	/*
+	 * All phrase-id have been found, wave segment of each unit is select
+	 * from the unitMap base on left and right unit
+	 */
+	DEBUG_INFO("All phrase id have been found, start unit selector");
 	this->fillNeighborId();
 	std::vector<unit_t>::iterator itu;
 	wav_segment_t segment;
@@ -230,12 +246,14 @@ void UnitSelector::createIdList(std::string str){
 		}
 		key = itu->key;
 		segment = this->unitMap[key];
-		// Select the most identical unit from unitMap
-		// Search process:
-		// {id, id_left, id_right} --[not exist?]-->
-		// {id, 0, id_right} --[not exist?]-->
-		// {id, id_left, 0} --[not exist?]-->
-		// {id, 0, 0}. This always match in unitMap
+		/*
+		 * Select the most identical unit from unitMap
+		 * Search process:
+		 * {id, id_left, id_right} --[not exist?]-->
+		 * {id, 0, id_right} --[not exist?]-->
+		 * {id, id_left, 0} --[not exist?]-->
+		 * {id, 0, 0}. This always match in unitMap
+		 */
 		if(strlen(segment.filename) == 0){
 			DEBUG_INFO("Key not found, try {%d,%d,%d}", itu->key.id, 0, itu->key.id_right);
 			key.id_left = 0;
@@ -412,12 +430,13 @@ void UnitSelector::searchPhrase(std::string phrase){
 	}
 }
 
-// Fill unit id left and right in struct key
 void UnitSelector::fillNeighborId(void){
+	DEBUG_INFO("Fill unit id left and right in struct key");
 	std::vector<unit_t>::iterator it;
 	it = this->idList.begin();
 	it->key.id_left = 0;
-	it->key.id_right = (it+1)->key.id;
+	if(this->idList.size() > 1) it->key.id_right = (it+1)->key.id;
+	else it->key.id_right = 0; return;
 	for(it = this->idList.begin() + 1; it != (this->idList.end() - 1); ++it){
 		it->key.id_left = (it-1)->key.id;
 		it->key.id_right = (it+1)->key.id;

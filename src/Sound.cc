@@ -106,6 +106,8 @@ int Sound::play_file(FILE *wav_file){
 			cptr -= err;
 		}
 	}
+	memset(samples, 0, samples_size);
+	for(int i = 10; i > 0; i--)snd_pcm_writei(handle, samples, period_size);
 	snd_pcm_close(handle);
 	free(samples);
 	return 0;
