@@ -6,11 +6,12 @@
  */
 #define TTS_VERSION_MAJOR		1
 #define TTS_VERSION_MINOR		0
-#define TTS_VERSION_SUBMINOR	2
+#define TTS_VERSION_SUBMINOR	3
 
 #include "TTS.h"
 #include "debug.h"
 #include "TTS.h"
+#include "Sound.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -49,6 +50,7 @@ void print_help(){
 			"-p, --play-enable       1: Play .wav file after synthesized (default)\n"
 			"                        0: Don't play .wav file after synthesized\n"
 			"-i, --direct            synthesize from directly text input\n"
+			"-l, --volume            set output volume\n"
 			"\n");
 }
 
@@ -71,6 +73,7 @@ int main(int argc, char* argv[]){
 		{"unresolved", 1, NULL, 'r'},
 		{"play-enable", 1, NULL, 'p'},
 		{"direct", 1, NULL, 'i'},
+		{"volume", 1, NULL, 'l'},
 		{NULL, 0, NULL, 0},
 	};
 	int more_help = 0;
@@ -83,7 +86,7 @@ int main(int argc, char* argv[]){
 	std::string direct_input_text;
 	while(1){
 		int c;
-		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:", long_option, NULL)) < 0){
+		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:l:", long_option, NULL)) < 0){
 			break;
 		}
 		switch(c){
@@ -119,6 +122,10 @@ int main(int argc, char* argv[]){
 		case 'i':
 			if(optarg != NULL) direct_input_text = std::string(optarg);
 			break;
+		case 'l':
+			int volume = atoi(optarg);
+			if((volume >= 0)&&(volume <= 100)) Sound::setMasterVolume(volume);
+			else printf("ERROR: Cannot set volume to %d\n\n",volume);
 		}
 	}
 	if(more_help > 0){

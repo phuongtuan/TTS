@@ -20,6 +20,7 @@ public:
 	static int play(FILE *wav_file);
 	static int play(std::string file_path);
 	static int play(const char *file_path);
+	static void setMasterVolume(int volume);
 	static int init();
 	static int set_hwparams(snd_pcm_t *handle, snd_pcm_hw_params_t *params, snd_pcm_access_t access);
 	static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams);
