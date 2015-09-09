@@ -12,6 +12,7 @@
 #include "debug.h"
 #include "TTS.h"
 #include "Sound.h"
+#include "NewsReader.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -51,6 +52,7 @@ void print_help(){
 			"                        0: Don't play .wav file after synthesized\n"
 			"-i, --direct            synthesize from directly text input\n"
 			"-l, --volume            set output volume\n"
+			"-n, --news-reader       run news reader program\n"
 			"\n");
 }
 
@@ -74,19 +76,21 @@ int main(int argc, char* argv[]){
 		{"play-enable", 1, NULL, 'p'},
 		{"direct", 1, NULL, 'i'},
 		{"volume", 1, NULL, 'l'},
+		{"news-reader", 0, NULL, 'n'},
 		{NULL, 0, NULL, 0},
 	};
 	int more_help = 0;
 	int more_version = 0;
-
+	if(argv[1] == NULL) more_help++;
 	std::string unresolved_output_path;
 	std::string url;
 	std::string text_path;
 	std::string output_path = std::string(getenv("TTS_SYS_ROOT")) + "/tts_out.wav";
 	std::string direct_input_text;
+	int volume;
 	while(1){
 		int c;
-		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:l:", long_option, NULL)) < 0){
+		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:l:n", long_option, NULL)) < 0){
 			break;
 		}
 		switch(c){
@@ -123,9 +127,14 @@ int main(int argc, char* argv[]){
 			if(optarg != NULL) direct_input_text = std::string(optarg);
 			break;
 		case 'l':
-			int volume = atoi(optarg);
+			volume = atoi(optarg);
 			if((volume >= 0)&&(volume <= 100)) Sound::setMasterVolume(volume);
 			else printf("ERROR: Cannot set volume to %d\n\n",volume);
+			break;
+		case 'n':
+			NewsReader::indexing();
+			NewsReader::run(&tts);
+			break;
 		}
 	}
 	if(more_help > 0){

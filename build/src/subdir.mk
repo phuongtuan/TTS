@@ -7,26 +7,33 @@ C_SRCS += \
 ../src/debug.c 
 
 CC_SRCS += \
+../src/HtmlParser.cc \
+../src/NewsReader.cc \
+../src/Sound.cc \
 ../src/TTS.cc \
 ../src/TextObjectTTS.cc \
-../src/UnitSelector.cc \
-../src/Sound.cc
+../src/UnitSelector.cc 
+
 
 OBJS += \
+./src/HtmlParser.o \
+./src/NewsReader.o \
+./src/Sound.o \
 ./src/TTS.o \
 ./src/TextObjectTTS.o \
 ./src/UnitSelector.o \
-./src/debug.o \
-./src/Sound.o
+./src/debug.o 
 
 C_DEPS += \
 ./src/debug.d 
 
 CC_DEPS += \
+./src/HtmlParser.d \
+./src/NewsReader.d \
+./src/Sound.d \
 ./src/TTS.d \
 ./src/TextObjectTTS.d \
-./src/UnitSelector.d \
-./src/Sound.d
+./src/UnitSelector.d 
 
 # Each subdirectory must supply rules for building sources it contributes	
 src/%.o: ../src/%.cc

@@ -57,7 +57,6 @@ int Sound::play(const char* file_path){
 	return ret;
 }
 
-
 int Sound::play_file(FILE *wav_file){
 	DEBUG_INFO("Playing wav file");
 	snd_pcm_t *handle;
@@ -113,6 +112,10 @@ int Sound::play_file(FILE *wav_file){
 	return 0;
 }
 
+/*
+ * Set master volume
+ * TODO: This method not work on ARM!
+ */
 void Sound::setMasterVolume(int volume)
 {
 	long min, max;
