@@ -14,6 +14,7 @@ namespace iHearTech {
 
 /*
  * Add new categories using this structure
+ * {<name of categories>, <path to category folder>, }
  */
 vector<index_t> NewsReader::categories = {
 		{"Chính trị xã hội", "/var/www/html/chinh-tri-xa-hoi/", },
@@ -61,26 +62,36 @@ void NewsReader::run(TTS *tts){
 	int choice_category;
 	int choice_news;
 	vector<index_t>::iterator it;
+	tts->sayText("Chào bạn, đây là chương trình đọc báo điện tử. Các chuyên mục hiện có gồm");
 	cout << "Các chuyên mục hiện có: " << endl;
 	for(it = categories.begin(); it != categories.end(); it++){
 		cout << i << ". " << it->name << endl;
+		tts->sayText((it->name).c_str());
 		i++;
 	}
+	tts->sayText("Bạn muốn chọn chuyên mục nào");
 	cout << "Chọn chuyên mục số: " << endl;
-	scanf("%d",&choice_category);
+	do{
+		scanf("%d",&choice_category);
+	}while(choice_category > categories.size());
 	cout << "Bạn đã chọn chuyên mục số: " << choice_category << endl;
 	choice_category --;
+	tts->sayText(("Bạn đã chọn chuyên mục " + categories[choice_category].name).c_str());
+	tts->sayText(("Chuyên mục " + categories[choice_category].name + " gồm có các tin sau").c_str());
 	cout << "Danh mục tin tức:" << endl;
 	vector<html_t>::iterator it_html;
 	i = 1;
 	for(it_html = categories[choice_category].list.begin(); it_html != categories[choice_category].list.end(); it_html++){
 		cout << i << ". " << it_html->title << endl;
+		tts->sayText(it_html->title.c_str());
 		i++;
 	}
 	cout << "Bạn chọn tin số: " << endl;
+
 	scanf("%d", &choice_news);
 	cout << "Bạn đã chọn tin số: " << choice_news << endl;
 	choice_news --;
+	tts->sayText(("Bạn đã chọn tin " + categories[choice_category].list[choice_news].title).c_str());
 	tts->sayText(categories[choice_category].list[choice_news].body.c_str());
 }
 
