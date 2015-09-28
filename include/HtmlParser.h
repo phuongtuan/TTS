@@ -17,6 +17,7 @@ struct html_t {
 	string title;
 	string body;
 	string header;
+	string url;
 };
 
 

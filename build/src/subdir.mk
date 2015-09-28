@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/debug.c 
+../src/get_html_link.c 
 
 CC_SRCS += \
 ../src/HtmlParser.cc \
@@ -22,10 +23,12 @@ OBJS += \
 ./src/TTS.o \
 ./src/TextObjectTTS.o \
 ./src/UnitSelector.o \
-./src/debug.o 
+./src/debug.o \
+./src/get_html_link.o 
 
 C_DEPS += \
-./src/debug.d 
+./src/debug.d \ 
+./src/get_html_link.d 
 
 CC_DEPS += \
 ./src/HtmlParser.d \
@@ -33,7 +36,8 @@ CC_DEPS += \
 ./src/Sound.d \
 ./src/TTS.d \
 ./src/TextObjectTTS.d \
-./src/UnitSelector.d 
+./src/UnitSelector.d
+
 
 # Each subdirectory must supply rules for building sources it contributes	
 src/%.o: ../src/%.cc

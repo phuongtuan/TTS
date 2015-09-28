@@ -9,6 +9,7 @@ messages
 *.dat
 *.nml
 news.txt
+index.txt
 *.html
 .project
 .cproject

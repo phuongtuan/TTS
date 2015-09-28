@@ -53,6 +53,8 @@ void print_help(){
 			"-i, --direct            synthesize from directly text input\n"
 			"-l, --volume            set output volume\n"
 			"-n, --news-reader       run news reader program\n"
+			"                        1: run in online mode\n"
+			"                        0: run in local mode\n"
 			"-c, --voice-command     enable voice command\n"
 			"\n");
 }
@@ -77,7 +79,7 @@ int main(int argc, char* argv[]){
 			{"play-enable", 1, NULL, 'p'},
 			{"direct", 1, NULL, 'i'},
 			{"volume", 1, NULL, 'l'},
-			{"news-reader", 0, NULL, 'n'},
+			{"news-reader", 1, NULL, 'n'},
 			{"voice-command", 0, NULL, 'c'},
 			{NULL, 0, NULL, 0},
 	};
@@ -90,10 +92,11 @@ int main(int argc, char* argv[]){
 	std::string output_path = std::string(getenv("TTS_SYS_ROOT")) + "/tts_out.wav";
 	std::string direct_input_text;
 	bool run_news_reader = false;
+	unsigned int news_reader_mode = 0;
 	int volume;
 	while(1){
 		int c;
-		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:l:cn", long_option, NULL)) < 0){
+		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:l:n:c", long_option, NULL)) < 0){
 			break;
 		}
 		switch(c){
@@ -136,6 +139,8 @@ int main(int argc, char* argv[]){
 			break;
 		case 'n':
 			run_news_reader = true;
+			if(*optarg == '1') news_reader_mode = 1;
+			else news_reader_mode = 0;
 			break;
 		case 'c':
 			NewsReader::enable_voice_cmd = true;
@@ -153,8 +158,15 @@ int main(int argc, char* argv[]){
 	if(run_news_reader){
 		if(NewsReader::enable_voice_cmd) printf("Run news reader with voice command input\n");
 		else printf("Run news reader with terminal input\n");
-		NewsReader::indexing();
-		NewsReader::run(&tts);
+		if(news_reader_mode == 0){
+			printf("Run news reader in local mode\n");
+			NewsReader::index_local();
+			NewsReader::run_local(&tts);
+		}else{
+			printf("Run news reader in online mode\n");
+			NewsReader::index_online();
+			NewsReader::run_online(&tts);
+		}
 		return 0;
 	}
 	/*

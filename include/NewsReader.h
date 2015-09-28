@@ -20,6 +20,7 @@ namespace iHearTech {
 struct index_t {
 	string name;
 	string path;
+	string keyword;
 	vector<html_t>list;
 };
 
@@ -32,13 +33,17 @@ class NewsReader {
 public:
 	NewsReader();
 	virtual ~NewsReader();
-	static void indexing();
-	static void online_index();
+	static void index_local();
+	static void index_online();
 	static vector<index_t> categories;
 	static vector<cmd_t> cmdList;
-	static void run(TTS *tts);
-	static unsigned int getVoiceCmd(void);
+
+	static void run_local(TTS *tts);
+	static void run_online(TTS *tts);
+	static unsigned int getVoiceCmd(int option);
 	static bool enable_voice_cmd;
+private:
+	static void splitString(std::vector<std::string> *tokens, const std::string *s, char delim);
 
 };
 
