@@ -14,6 +14,7 @@
 
 namespace iHearTech {
 
+bool NewsReader::enable_voice_cmd = false;
 /*
  * Add new categories using this structure
  * {<name of categories>, <path to category folder>, }
@@ -22,7 +23,9 @@ vector<index_t> NewsReader::categories = {
 		{"Chính trị xã hội", "/var/www/html/chinh-tri-xa-hoi/", },
 		{"Pháp luật", "/var/www/html/phap-luat/", }
 };
-
+/*
+ * Commands list and associated indexes
+ */
 vector<cmd_t> NewsReader::cmdList = {
 		{"mojt", 1},
 		{"hai", 2},
@@ -68,8 +71,12 @@ void NewsReader::indexing(void){
 	}
 }
 
+void NewsReader::online_index(void){
+
+}
+
 unsigned int NewsReader::getVoiceCmd(void){
-	system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh");
+	system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
 	std::ifstream ifs("/media/SD/iheartech-tts/vcmd_result");
 	std::string cmd_str((std::istreambuf_iterator<char>(ifs)),
 			(std::istreambuf_iterator<char>()));
@@ -105,13 +112,15 @@ void NewsReader::run(TTS *tts){
 	/*
 	 * Select voice command input or terminal input
 	 */
-#ifndef __VOICE_COMMAND_INPUT__
-	do{
-		scanf("%d",&choice_category);
-	}while(choice_category > categories.size());
-#else
-	choice_category = NewsReader::getVoiceCmd() - 6;
-#endif
+	if(enable_voice_cmd){
+		do{
+			choice_category = NewsReader::getVoiceCmd() - 6;
+		}while(choice_category > categories.size());
+	} else{
+		do{
+			scanf("%d",&choice_category);
+		}while(choice_category > categories.size());
+	}
 	cout << "Bạn đã chọn chuyên mục số: " << choice_category << endl;
 	choice_category --;
 	tts->sayText(("Bạn đã chọn chuyên mục " + categories[choice_category].name).c_str());
@@ -125,13 +134,17 @@ void NewsReader::run(TTS *tts){
 		i++;
 	}
 	cout << "Bạn chọn tin số: " << endl;
-#ifndef __VOICE_COMMAND_INPUT__
-	scanf("%d", &choice_news);
-	cout << "Bạn đã chọn tin số: " << choice_news << endl;
-	choice_news --;
-#else
-	choice_news = NewsReader::getVoiceCmd();
-#endif
+	if(enable_voice_cmd){
+		do{
+			choice_news = NewsReader::getVoiceCmd() - 1;
+		}while(choice_news > categories[choice_category].list.size());
+	} else{
+		do{
+			scanf("%d", &choice_news);
+			cout << "Bạn đã chọn tin số: " << choice_news << endl;
+			choice_news --;
+		}while(choice_news > categories[choice_category].list.size());
+	}
 	tts->sayText(("Bạn đã chọn tin " + categories[choice_category].list[choice_news].title).c_str());
 	tts->sayText(categories[choice_category].list[choice_news].body.c_str());
 }

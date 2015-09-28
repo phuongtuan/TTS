@@ -33,10 +33,12 @@ public:
 	NewsReader();
 	virtual ~NewsReader();
 	static void indexing();
+	static void online_index();
 	static vector<index_t> categories;
 	static vector<cmd_t> cmdList;
 	static void run(TTS *tts);
 	static unsigned int getVoiceCmd(void);
+	static bool enable_voice_cmd;
 
 };
 

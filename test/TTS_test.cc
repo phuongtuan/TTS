@@ -6,7 +6,7 @@
  */
 #define TTS_VERSION_MAJOR		1
 #define TTS_VERSION_MINOR		0
-#define TTS_VERSION_SUBMINOR	3
+#define TTS_VERSION_SUBMINOR	4
 
 #include "TTS.h"
 #include "debug.h"
@@ -53,12 +53,13 @@ void print_help(){
 			"-i, --direct            synthesize from directly text input\n"
 			"-l, --volume            set output volume\n"
 			"-n, --news-reader       run news reader program\n"
+			"-c, --voice-command     enable voice command\n"
 			"\n");
 }
 
 void print_version(){
 	printf("iHearTech Vietnamese Text-to-Speech v%d.%d.%d\n\n", TTS_VERSION_MAJOR,
-				TTS_VERSION_MINOR, TTS_VERSION_SUBMINOR);
+			TTS_VERSION_MINOR, TTS_VERSION_SUBMINOR);
 }
 
 int main(int argc, char* argv[]){
@@ -66,18 +67,19 @@ int main(int argc, char* argv[]){
 	TTS tts;
 	struct option long_option[] =
 	{
-		{"help", 0, NULL, 'h'},
-		{"version", 1, NULL, 'v'},
-		{"url", 1, NULL, 'u'},
-		{"text", 1, NULL, 't'},
-		{"output", 1, NULL, 'o'},
-		{"debug", 1, NULL, 'd'},
-		{"unresolved", 1, NULL, 'r'},
-		{"play-enable", 1, NULL, 'p'},
-		{"direct", 1, NULL, 'i'},
-		{"volume", 1, NULL, 'l'},
-		{"news-reader", 0, NULL, 'n'},
-		{NULL, 0, NULL, 0},
+			{"help", 0, NULL, 'h'},
+			{"version", 0, NULL, 'v'},
+			{"url", 1, NULL, 'u'},
+			{"text", 1, NULL, 't'},
+			{"output", 1, NULL, 'o'},
+			{"debug", 1, NULL, 'd'},
+			{"unresolved", 1, NULL, 'r'},
+			{"play-enable", 1, NULL, 'p'},
+			{"direct", 1, NULL, 'i'},
+			{"volume", 1, NULL, 'l'},
+			{"news-reader", 0, NULL, 'n'},
+			{"voice-command", 0, NULL, 'c'},
+			{NULL, 0, NULL, 0},
 	};
 	int more_help = 0;
 	int more_version = 0;
@@ -87,10 +89,11 @@ int main(int argc, char* argv[]){
 	std::string text_path;
 	std::string output_path = std::string(getenv("TTS_SYS_ROOT")) + "/tts_out.wav";
 	std::string direct_input_text;
+	bool run_news_reader = false;
 	int volume;
 	while(1){
 		int c;
-		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:l:n", long_option, NULL)) < 0){
+		if((c = getopt_long(argc, argv, "hvu:t:o:d:r:p:i:l:cn", long_option, NULL)) < 0){
 			break;
 		}
 		switch(c){
@@ -132,8 +135,10 @@ int main(int argc, char* argv[]){
 			else printf("ERROR: Cannot set volume to %d\n\n",volume);
 			break;
 		case 'n':
-			NewsReader::indexing();
-			NewsReader::run(&tts);
+			run_news_reader = true;
+			break;
+		case 'c':
+			NewsReader::enable_voice_cmd = true;
 			break;
 		}
 	}
@@ -143,6 +148,13 @@ int main(int argc, char* argv[]){
 	}
 	if(more_version > 0){
 		print_version();
+		return 0;
+	}
+	if(run_news_reader){
+		if(NewsReader::enable_voice_cmd) printf("Run news reader with voice command input\n");
+		else printf("Run news reader with terminal input\n");
+		NewsReader::indexing();
+		NewsReader::run(&tts);
 		return 0;
 	}
 	/*

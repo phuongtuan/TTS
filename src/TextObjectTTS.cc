@@ -145,7 +145,7 @@ bool TextObjectTTS::getTextFromUrl(std::string url){
 	}
 	ofs << this->inputStr;
 	delete[] cptr;
-	remove((TTS_SYS_ROOT + "/news.html").c_str());
+	//remove((TTS_SYS_ROOT + "/news.html").c_str());
 	DEBUG_INFO("Store news content in file %s", (TTS_SYS_ROOT + "news.txt").c_str());
 	return true;
 }
