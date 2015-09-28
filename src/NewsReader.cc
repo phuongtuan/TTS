@@ -25,20 +25,22 @@ bool NewsReader::enable_voice_cmd = false;
  */
 vector<index_t> NewsReader::categories = {
 		{"Chính trị xã hội", "/var/www/html/chinh-tri-xa-hoi/", "http://tuoitre.vn/tin/chinh-tri-xa-hoi",},
+		{"Pháp luật", "/var/www/html/phap-luat/", "http://tuoitre.vn/tin/phap-luat", },
+		{"Văn hóa giải trí", "/var/www/html/van-hoa-giai-tri/", "http://tuoitre.vn/tin/van-hoa-giai-tri", },
 		{"Kinh tế", "/var/www/html/kinh-te/", "http://tuoitre.vn/tin/kinh-te", },
 		{"Thế giới", "/var/www/html/the-gioi/", "http://tuoitre.vn/tin/the-gioi", },
-		{"Văn hóa giải trí", "/var/www/html/van-hoa-giai-tri/", "http://tuoitre.vn/tin/van-hoa-giai-tri", },
-		{"Pháp luật", "/var/www/html/phap-luat/", "http://tuoitre.vn/tin/phap-luat", },
+
+
 };
 /*
  * Commands list and associated indexes
  */
 vector<cmd_t> NewsReader::cmdList = {
-		{"mojt", 1},
+		{"moojt", 1},
 		{"hai", 2},
 		{"ba", 3},
-		{"bon", 4},
-		{"nam", 5},
+		{"boosn", 4},
+		{"nawm", 5},
 		{"chisnh", 6},
 		{"phasp", 7},
 		{"vawn", 8},
@@ -109,7 +111,7 @@ void NewsReader::index_online(void){
 				else{
 					html.url = tokens[0];
 					html.title = tokens[1];
-					it->list.push_back(html);
+					if(it->list.size() < 6) it->list.push_back(html);
 				}
 				break;
 			}
@@ -128,9 +130,11 @@ unsigned int NewsReader::getVoiceCmd(int option){
 			(std::istreambuf_iterator<char>()));
 	vector<cmd_t>::iterator it;
 	std::size_t found;
+	printf("Command: %s\n", cmd_str.c_str());
 	for(it = cmdList.begin(); it != cmdList.end(); it++){
 		found = cmd_str.find(it->keyword, 0);
-		if (found!=std::string::npos){
+		if (found != std::string::npos){
+			printf("Command index: %d\n", it->index);
 			return it->index;
 		}
 	}
@@ -160,7 +164,7 @@ void NewsReader::run_local(TTS *tts){
 	 */
 	if(enable_voice_cmd){
 		do{
-			choice_category = NewsReader::getVoiceCmd(1) - 6;
+			choice_category = NewsReader::getVoiceCmd(1);
 		}while(choice_category > categories.size());
 	} else{
 		do{
@@ -182,15 +186,15 @@ void NewsReader::run_local(TTS *tts){
 	cout << "Bạn chọn tin số: " << endl;
 	if(enable_voice_cmd){
 		do{
-			choice_news = NewsReader::getVoiceCmd(2) - 1;
+			choice_news = NewsReader::getVoiceCmd(2);
 		}while(choice_news > categories[choice_category].list.size());
 	} else{
 		do{
 			scanf("%d", &choice_news);
 			cout << "Bạn đã chọn tin số: " << choice_news << endl;
-			choice_news --;
 		}while(choice_news > categories[choice_category].list.size());
 	}
+	choice_news --;
 	tts->sayText(("Bạn đã chọn tin " + categories[choice_category].list[choice_news].title).c_str());
 	tts->sayText(categories[choice_category].list[choice_news].body.c_str());
 }
@@ -215,7 +219,7 @@ void NewsReader::run_online(TTS *tts){
 	 */
 	if(enable_voice_cmd){
 		do{
-			choice_category = NewsReader::getVoiceCmd(1) - 6;
+			choice_category = NewsReader::getVoiceCmd(1) - 5;
 		}while(choice_category > categories.size());
 	} else{
 		do{
@@ -237,15 +241,15 @@ void NewsReader::run_online(TTS *tts){
 	cout << "Bạn chọn tin số: " << endl;
 	if(enable_voice_cmd){
 		do{
-			choice_news = NewsReader::getVoiceCmd(2) - 1;
+			choice_news = NewsReader::getVoiceCmd(2);
 		}while(choice_news > categories[choice_category].list.size());
 	} else{
 		do{
 			scanf("%d", &choice_news);
 			cout << "Bạn đã chọn tin số: " << choice_news << endl;
-			choice_news --;
 		}while(choice_news > categories[choice_category].list.size());
 	}
+	choice_news --;
 	tts->sayText(("Bạn đã chọn tin " + categories[choice_category].list[choice_news].title).c_str());
 	tts->sayUrl(categories[choice_category].list[choice_news].url);
 }
