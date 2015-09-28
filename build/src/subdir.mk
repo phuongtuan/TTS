@@ -4,7 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/debug.c 
+../src/debug.c \
 ../src/get_html_link.c 
 
 CC_SRCS += \
@@ -27,7 +27,7 @@ OBJS += \
 ./src/get_html_link.o 
 
 C_DEPS += \
-./src/debug.d \ 
+./src/debug.d \
 ./src/get_html_link.d 
 
 CC_DEPS += \

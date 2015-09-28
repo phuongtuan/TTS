@@ -39,11 +39,11 @@ vector<cmd_t> NewsReader::cmdList = {
 		{"ba", 3},
 		{"bon", 4},
 		{"nam", 5},
-		{"chisnh trij xax hooji", 6},
-		{"phasp luaajt", 7},
-		{"vawn hoas dari tris", 8},
-		{"kinh tees", 9},
-		{"thees dowsi", 10}
+		{"chisnh", 6},
+		{"phasp", 7},
+		{"vawn", 8},
+		{"kinh", 9},
+		{"thees", 10}
 };
 
 NewsReader::NewsReader() {
