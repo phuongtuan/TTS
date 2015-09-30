@@ -16,7 +16,7 @@ const char *TextObjectTTS::kh[] = {"", "NGÀN ", "TRIỆU ", "TỶ ", "NGÀN T�
 // CAUTION: This type of declaration can only be compiled with c++11 flag *
 //*************************************************************************
 std::vector<pattern_t> TextObjectTTS::regexPattern = {
-		{(char *)"(“|”|<EM>|</EM>|<SUP>|</SUP>|\302\240|\342\200\246|[.][.])", &normalize_rmhtml},
+		{(char *)"(“|”|<.*?>|\302\240|\342\200\246|[.][.])", &normalize_rmhtml},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})-([[:digit:]]{1,2})-([[:digit:]]{4}) ?", &normalize_date_1},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})/([[:digit:]]{1,2})/([[:digit:]]{4}) ?", &normalize_date_1},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})[.]([[:digit:]]{1,2})[.]([[:digit:]]{4}) ?", &normalize_date_1},
@@ -26,7 +26,7 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"(NGÀY |SÁNG |TRƯA |CHIỀU |TỐI |ĐÊM |KHUYA |HAI |BA |TƯ |NĂM |SÁU |BẢY |NHẬT |QUA |NAY )([[:digit:]]{1,2})[\\.\\/-]([[:digit:]]{1,2}) ?", &normalize_date_5},
 		{(char *)"(THỨ |HẠNG |GIẢI )([[:digit:]]+)",&normalize_rank},
 		{(char *)"([[:digit:]]{1,2})(H|G|:)([[:digit:]]{1,2})?( AM| PM)? ?", &normalize_time},
-		{(char *)"([[:digit:]]+) ?(KG|G|MG|KM|M|CM|MM|UM|NM|HA)(2|3)?", &normalize_size},
+		{(char *)"([[:digit:]]+)[ ]?(KG|G|MG|KM|M|CM|MM|UM|NM|HA)(2|3)?[ |.|,|:|;]", &normalize_size},
 		{(char *)"([[:digit:]]+) O C",&normalize_degree},
 		{(char *)"([[:digit:]]+),([[:digit:]]+) ?", &normalize_numcomma},
 		{(char *)"[[:digit:]](\\.)[[:digit:]]", &normalize_numdot},
@@ -314,7 +314,7 @@ std::string* TextObjectTTS::normalize_snum(std::string *src, regmatch_t *pmatch)
 
 std::string* TextObjectTTS::normalize_remove(std::string *src, regmatch_t *pmatch){
 	DEBUG_INFO("normalize_remove is called");
-	src->erase(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so);
+	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, " ");
 	return src;
 }
 

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <regex.h>
+#include <pcre2posix.h>
 #include <fstream>
 #include "debug.h"
 #include <glib.h>
