@@ -26,12 +26,12 @@ UnitSelector::~UnitSelector(){
 	//	vector<unit_key_t>().swap(this->vectorUnitKey);
 }
 
-void UnitSelector::initMaps(){
+int UnitSelector::initMaps(){
 	DEBUG_INFO("Initializing hash maps...");
 	std::string TTS_SYS_ROOT(getenv("TTS_SYS_ROOT"));
 	if(TTS_SYS_ROOT.empty()){
 		DEBUG_FATAL("TTS_SYS_ROOT is not set");
-		return;
+		return 1;
 	}
 	std::ifstream ifsUnitId(TTS_SYS_ROOT + TTS_UNIT_ID_PATH);
 	std::ifstream ifsUnitSel(TTS_SYS_ROOT + TTS_UNIT_SELECTOR_PATH);
@@ -39,7 +39,7 @@ void UnitSelector::initMaps(){
 	if(!(ifsUnitId.is_open()&&ifsUnitSel.is_open()&&ifsSpecial.is_open())){
 		DEBUG_ERROR("Cannot open TTS dictionary, return now");
 		this->_good = false;
-		return;
+		return 1;
 	}
 	DEBUG_INFO("Initializing unit ID map...");
 	std::string strline;
@@ -76,6 +76,8 @@ void UnitSelector::initMaps(){
 		this->specMap[tokens[0]] = tokens[1];
 	}while(!ifsSpecial.eof());
 	DEBUG_INFO("Finish initializing hash maps");
+	this->_good = true;
+	return 0;
 }
 
 void UnitSelector::storeMaps(void){
@@ -118,13 +120,13 @@ void UnitSelector::storeMaps(void){
 	fclose(fpSpecDict);
 }
 
-void UnitSelector::restoreMaps(void){
+int UnitSelector::restoreMaps(void){
 	DEBUG_INFO("Restoring hash maps");
 	char *root = getenv("TTS_SYS_ROOT");
 	if(root == NULL){
 		printf("%sUnitSelector::restoreMaps: TTS_SYS_ROOT variable is not set\n"
 				"Abort operation...%s\n",KRED,KNRM);
-		return;
+		return 1;
 	}
 	std::string TTS_SYS_ROOT(root);
 	FILE *fpUnitId = fopen((TTS_SYS_ROOT + TTS_UNIT_ID_DAT).c_str(),"r");
@@ -132,7 +134,7 @@ void UnitSelector::restoreMaps(void){
 	if(!fpUnitId){
 		DEBUG_ERROR("Cannot load unit ID map data");
 		this->_good = false;
-		return;
+		return 1;
 	}
 	this->unitIdMap.set_empty_key(std::string());
 	this->unitIdMap.unserialize(unitIdMapSerializer(), fpUnitId);
@@ -143,23 +145,25 @@ void UnitSelector::restoreMaps(void){
 	if(!fpUnitSel){
 		DEBUG_ERROR("Cannot load unit map data");
 		this->_good = false;
-		return;
+		return 1;
 	}
 	this->unitMap.set_empty_key(this->default_key);
 	this->unitMap.unserialize(unitMapSerializer(), fpUnitSel);
 	fclose(fpUnitSel);
-	DEBUG_INFO("Finished restoring hash maps");
 
 	// De-serialize specMap
 	FILE *fpSpecDict  = fopen((TTS_SYS_ROOT + TTS_SPEC_DAT).c_str(), "r");
 	if(!fpSpecDict){
 		DEBUG_ERROR("Cannot load specMap.dat");
 		this->_good = false;
-		return;
+		return 1;
 	}
 	this->specMap.set_empty_key(std::string());
 	this->specMap.unserialize(specMapSerializer(), fpSpecDict);
 	fclose(fpSpecDict);
+	DEBUG_INFO("Finished restoring hash maps");
+	this->_good = true;
+	return 0;
 }
 
 // Create ID list from an input string
@@ -382,6 +386,7 @@ void UnitSelector::resolveAbbreWord(string word){
 		this->spellWord(word);
 	}else{
 		phrase.erase(phrase.find('\r'), 1);
+		DEBUG_INFO("Normalized phrase: %s", phrase.c_str());
 		this->searchPhrase(phrase);
 	}
 }
@@ -410,21 +415,25 @@ void UnitSelector::searchPhrase(std::string phrase){
 	phrase.clear();
 	int i;
 	vector<string>::iterator it = tokens.begin();
-	if((it + MAX_WORD_IN_PHRASE) < tokens.end()){
-		i = MAX_WORD_IN_PHRASE;
-	}else i = tokens.end() - it;
-	for( ; i > 0; i--){
-		phrase.clear();
-		for(int j = 0; j < i; j++){
-			phrase += *(it + j) + " ";
-		}
-		phrase.erase(phrase.length()-1,1);
-		if(!phrase.empty()){
-			if((id = this->unitIdMap[phrase]) != 0){
-				it += i;
-				unit.key.id = id;
-				this->idList.push_back(unit);
-				break;
+	while(it != tokens.end()){
+		if((it + MAX_WORD_IN_PHRASE) < tokens.end()){
+			i = MAX_WORD_IN_PHRASE;
+		}else i = tokens.end() - it;
+		DEBUG_INFO("Searching phrase with maximum length = %d", i);
+		for( ; i > 0; i--){
+			phrase.clear();
+			for(int j = 0; j < i; j++){
+				phrase += *(it + j) + " ";
+			}
+			phrase.erase(phrase.length()-1,1);
+			if(!phrase.empty()){
+				if((id = this->unitIdMap[phrase]) != 0){
+					DEBUG_INFO("Longest phrase found, id = %d, length = %d", id, i);
+					it += i;
+					unit.key.id = id;
+					this->idList.push_back(unit);
+					break;
+				}
 			}
 		}
 	}

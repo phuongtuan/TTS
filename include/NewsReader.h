@@ -10,6 +10,8 @@
 
 #define __VOICE_COMMAND_INPUT__
 #define NUMBER_OF_CMD	10
+#define MAX_NUMBER_OF_NEWS	5
+
 #include <string>
 #include <vector>
 #include "TTS.h"

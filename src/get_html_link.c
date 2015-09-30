@@ -71,7 +71,7 @@ int get_link(void){
 	int size = 0, res = 0;
 	unsigned int i;
 
-	system("wget -O ./tuoitre.html http://tuoitre.vn");
+	system("wget -O ./tuoitre.html http://tuoitre.vn 2> /dev/null");
 	html_file = fopen("./tuoitre.html", "rb");
 	link_file = fopen("./index.txt", "wb");
 	if(html_file == NULL) return -1;

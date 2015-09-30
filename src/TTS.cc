@@ -17,7 +17,11 @@ TTS::TTS() {
 	this->play_enable = true;
 	this->text_obj = new TextObjectTTS();
 	this->unit_sel = new UnitSelector();
-	unit_sel->restoreMaps();
+	if(unit_sel->restoreMaps() != 0){
+		DEBUG_WARNING("Cannot unserialize hash maps. Re-init hash maps");
+		unit_sel->initMaps();
+		unit_sel->storeMaps();
+	}
 	this->TTS_SYS_ROOT = std::string(getenv("TTS_SYS_ROOT"));
 }
 

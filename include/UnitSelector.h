@@ -210,9 +210,9 @@ class UnitSelector {
 public:
 	UnitSelector();
 	virtual ~UnitSelector();
-	void initMaps(void);
+	int initMaps(void);
 	void storeMaps(void);
-	void restoreMaps(void);
+	int restoreMaps(void);
 	void createIdList(std::string);
 	void outputIdListToFile(std::string path);
 	std::vector<unit_t> getIdList();

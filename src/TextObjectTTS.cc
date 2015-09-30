@@ -68,15 +68,21 @@ void TextObjectTTS::normalize(){
 		if(reti){
 			DEBUG_ERROR("Cannot compile regex pattern, return code = %d", reti);
 		}else{
-			while(search_pattern((char *)it->pattern, &regex, &temp, pmatch)){
+			while(search_pattern((char *)it->pattern, &regex, &temp, pmatch)!=NULL){
 				// if expression is matched, replace matched string with normalized string
 				// TODO: regex should be compile only one time
 				it->handler(&temp, pmatch);
 			}
+			DEBUG_INFO("Freeing allocated regex");
 			regfree(&regex);
+			DEBUG_INFO("Regex freed");
 		}
 	}
 	this->outputStr = temp;
+	DEBUG_INFO("Store normalize string to ./text.nml");
+	std::ofstream ofs("./text.nml", std::ofstream::out);
+	ofs << this->outputStr;
+	ofs.close();
 	DEBUG_INFO("End of normalize process");
 }
 
