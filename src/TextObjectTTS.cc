@@ -28,9 +28,10 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"([[:digit:]]{1,2})(H|G|:)([[:digit:]]{1,2})?( AM| PM)? ?", &normalize_time},
 		{(char *)"([[:digit:]]+)[ ]?(KG|G|MG|KM|M|CM|MM|UM|NM|HA)(2|3)?[ |.|,|:|;]", &normalize_size},
 		{(char *)"([[:digit:]]+) O C",&normalize_degree},
+		{(char *)"([[:digit:]]+)/([[:digit:]]+)",&normalize_proportion},
 		{(char *)"([[:digit:]]+),([[:digit:]]+) ?", &normalize_numcomma},
 		{(char *)"[[:digit:]](\\.)[[:digit:]]", &normalize_numdot},
-		{(char *)"(\\$)?([[:digit:]]+)(\\$|%)? ?", &normalize_snum},
+		{(char *)"(\\$)?([[:digit:]]+)(\\$|\%)? ?", &normalize_snum},
 		{(char *)"(^| )(TP|Q|H|P|X)\\.", &normalize_cidis},
 		{(char *)"/", &normalize_slash},
 		// These patterns should be at the end of this list
@@ -398,6 +399,20 @@ std::string* TextObjectTTS::normalize_numcomma(std::string *src, regmatch_t *pma
 
 std::string* TextObjectTTS::normalize_numdot(std::string *src, regmatch_t *pmatch){
 	src->erase(pmatch[1].rm_so, 1);
+	return src;
+}
+
+std::string* TextObjectTTS::normalize_proportion(std::string *src, regmatch_t *pmatch){
+	int num;
+	DEBUG_INFO("normalize_proportion is called");
+	std::string num_string;
+	std::string temp;
+	num = atoi(src->c_str() + pmatch[1].rm_so);
+	temp.append(*normalize_number(&num_string, num) + "PHẦN ");
+	num = atoi(src->c_str() + pmatch[2].rm_so);
+	temp.append(*normalize_number(&num_string, num));
+	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, temp);
+	DEBUG_INFO("Normalized string is %s", temp.c_str());
 	return src;
 }
 
