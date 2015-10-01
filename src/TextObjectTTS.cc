@@ -31,7 +31,7 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"([[:digit:]]+)/([[:digit:]]+)",&normalize_proportion},
 		{(char *)"([[:digit:]]+),([[:digit:]]+) ?", &normalize_numcomma},
 		{(char *)"[[:digit:]](\\.)[[:digit:]]", &normalize_numdot},
-		{(char *)"(\\$)?([[:digit:]]+)(\\$|\%)? ?", &normalize_snum},
+		{(char *)"(\\$)?([[:digit:]]+)(\\$|%)? ?", &normalize_snum},
 		{(char *)"(^| )(TP|Q|H|P|X)\\.", &normalize_cidis},
 		{(char *)"/", &normalize_slash},
 		// These patterns should be at the end of this list
