@@ -14,3 +14,4 @@ index.txt
 .project
 .cproject
 bin/
+*~

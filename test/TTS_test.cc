@@ -4,9 +4,9 @@
  *  Created on: Jul 1, 2015
  *      Author: messier
  */
-#define TTS_VERSION_MAJOR		1
-#define TTS_VERSION_MINOR		0
-#define TTS_VERSION_SUBMINOR	4
+#define TTS_VERSION_MAJOR       1
+#define TTS_VERSION_MINOR       1
+#define TTS_VERSION_SUBMINOR    0
 
 #include "TTS.h"
 #include "debug.h"
