@@ -100,6 +100,7 @@ void tts_log(const char *date, const char *time, const char *severity,
 		vfprintf(log_file, buffer, args);
 		fclose(log_file);
 		va_end(args);
+		free(buffer);
 	}
 #endif
 }
