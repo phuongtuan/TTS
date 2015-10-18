@@ -49,7 +49,8 @@ TextObjectTTS::TextObjectTTS(){
 }
 TextObjectTTS::~TextObjectTTS(){
 }
-// Interfaces
+
+// Run normalize process on internal string
 void TextObjectTTS::normalize(){
 	DEBUG_INFO("Start normalize process");
 	if(this->inputStr.empty()){
@@ -87,17 +88,16 @@ void TextObjectTTS::normalize(){
 	DEBUG_INFO("End of normalize process");
 }
 
+// Set internal string
 void TextObjectTTS::setInputStr(std::string str){
 	this->inputStr = str;
 }
-
+// Get internal string
 std::string TextObjectTTS::getOutputStr(){
 	return this->outputStr;
 }
 
-/*
- * html parser
- */
+// Download webpage and extract text from it
 bool TextObjectTTS::getTextFromUrl(std::string url){
 	DEBUG_INFO("Getting news content from URL");
 	int res = 0;
@@ -559,6 +559,4 @@ inline regmatch_t* TextObjectTTS::search_pattern(char * pattern, regex_t* regex,
 	DEBUG_INFO("Found match expression at position %d",pmatch->rm_so);
 	return pmatch;
 }
-
-
 } /* namespace iHearTech */

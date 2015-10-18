@@ -19,11 +19,24 @@
 using namespace std;
 namespace iHearTech {
 
+// Struture contains news list and related information for a news category
 struct index_t {
+	string name;						// Name of category (which is spoken during category selection)
+	string path;						// Local path on the machine
+	string keyword;						// Keyword to search in the index.html page
+	vector<html_t> list;				// Vector contains news list (html format)
+};
+
+struct news_t {
 	string name;
 	string path;
-	string keyword;
-	vector<html_t>list;
+};
+
+struct category_t {
+	string name;
+	string path;
+	vector<category_t> subcategory;
+	vector<news_t> news_list;
 };
 
 struct cmd_t {
@@ -36,17 +49,18 @@ public:
 	NewsReader();
 	virtual ~NewsReader();
 	static void index_local();
+	static void index_local(char *root_file_path);
 	static void index_online();
 	static vector<index_t> categories;
+	static category_t root_index;
 	static vector<cmd_t> cmdList;
-
 	static void run_local(TTS *tts);
 	static void run_online(TTS *tts);
 	static unsigned int getVoiceCmd(int option);
 	static bool enable_voice_cmd;
 private:
 	static void splitString(std::vector<std::string> *tokens, const std::string *s, char delim);
-
+	static int fillCategory(category_t *cat);
 };
 
 } /* namespace iHearTech */

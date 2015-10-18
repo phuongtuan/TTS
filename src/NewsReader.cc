@@ -4,7 +4,6 @@
  *  Created on: Sep 9, 2015
  *      Author: messier
  */
-
 #include "NewsReader.h"
 #include <string.h>
 #include <iostream>
@@ -15,24 +14,28 @@
 #include <fstream>
 #include <sstream>
 #include "Sound.h"
+#include "rapidxml.hpp"			// xml parser library
+
+using namespace std;
+using namespace rapidxml;
 
 namespace iHearTech {
 
 bool NewsReader::enable_voice_cmd = false;
-/*
- * Add new categories using this structure
- * {<name of categories>, <path to category folder>, }
- */
+
+// Add new categories using this structure
+// {<name of categories>, <path to category folder>, }
 vector<index_t> NewsReader::categories = {
-		{"Chính trị xã hội", "/var/www/html/chinh-tri-xa-hoi/", "http://tuoitre.vn/tin/chinh-tri-xa-hoi",},
-		{"Pháp luật", "/var/www/html/phap-luat/", "http://tuoitre.vn/tin/phap-luat", },
-		{"Văn hóa giải trí", "/var/www/html/van-hoa-giai-tri/", "http://tuoitre.vn/tin/van-hoa-giai-tri", },
-		{"Kinh tế", "/var/www/html/kinh-te/", "http://tuoitre.vn/tin/kinh-te", },
-		{"Thế giới", "/var/www/html/the-gioi/", "http://tuoitre.vn/tin/the-gioi", },
+		{"Chính trị xã hội", "/var/www/html/chinh-tri-xa-hoi/", "http://tuoitre.vn/tin/chinh-tri-xa-hoi"},
+		{"Pháp luật", "/var/www/html/phap-luat/", "http://tuoitre.vn/tin/phap-luat"},
+		{"Văn hóa giải trí", "/var/www/html/van-hoa-giai-tri/", "http://tuoitre.vn/tin/van-hoa-giai-tri"},
+		{"Kinh tế", "/var/www/html/kinh-te/", "http://tuoitre.vn/tin/kinh-te"},
+		{"Thế giới", "/var/www/html/the-gioi/", "http://tuoitre.vn/tin/the-gioi"},
 };
-/*
- * Commands list and associated indexes
- */
+
+category_t NewsReader::root_index;
+
+// Commands list and associated indexes
 vector<cmd_t> NewsReader::cmdList = {
 		{"moojt", 1},
 		{"hai", 2},
@@ -48,13 +51,13 @@ vector<cmd_t> NewsReader::cmdList = {
 
 NewsReader::NewsReader() {
 	// TODO Auto-generated constructor stub
-
 }
 
 NewsReader::~NewsReader() {
 	// TODO Auto-generated destructor stub
 }
 
+// Split string into tokens. Each tokens separate by character delim
 void NewsReader::splitString(std::vector<std::string> *tokens, const std::string *s, char delim){
 	stringstream ss(*s);
 	string item;
@@ -64,29 +67,51 @@ void NewsReader::splitString(std::vector<std::string> *tokens, const std::string
 	}
 }
 
-/*
- * Indexing all html file
- */
-void NewsReader::index_local(void){
-	DIR *pDir;
-	struct dirent *entry;
-	vector<index_t>::iterator it_category;
-	string file_path;
-	html_t html;
-	for(it_category = categories.begin(); it_category != categories.end(); ++it_category){
-		it_category->list.clear();
-		pDir = opendir(it_category->path.c_str());
-		if(pDir != NULL){
-			while((entry = readdir(pDir)) != NULL){
-				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0){
-					HtmlParser::process(&html, (it_category->path + string(entry->d_name)).c_str());
-					if(it_category->list.size() < MAX_NUMBER_OF_NEWS)it_category->list.push_back(html);
-				}
-			}
-		}
+// Recursion function to fill category struct
+int NewsReader::fillCategory(category_t *cat){
+	// Open index.xml file
+	ifstream ifs(cat->path + "/index.xml");
+	if(ifs.is_open() == false){
+		DEBUG_ERROR("Cannot open index.xml in %s", cat->path.c_str());
+		return -1;
 	}
+	vector<char>buffer((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
+	buffer.push_back('\0');
+	// Parsing into xml document structure
+	xml_document<> xml;
+	xml_node<> *root_node;
+	xml.parse<0>(&buffer[0]);
+	root_node = xml.first_node("category");
+	category_t sub_category;
+	news_t news;
+	// Iterate over sub-category
+	for(xml_node<> *sub_category_node = root_node->first_node("category");
+			sub_category_node; sub_category_node = sub_category_node->next_sibling()){
+		sub_category.name = string(sub_category_node->first_attribute("name")->value());
+		sub_category.path = string(sub_category_node->first_attribute("path")->value());
+		// Recursion call
+		fillCategory(&sub_category);
+		cat->subcategory.push_back(sub_category);
+	}
+	// Iterate over news
+	for(xml_node<> *news_node = root_node->first_node("news");
+			news_node; news_node = news_node->next_sibling()){
+		news.name = string(news_node->first_attribute("name")->value());
+		news.path = string(news_node->first_attribute("path")->value());
+		cat->news_list.push_back(news);
+	}
+	return 0;
 }
 
+// Indexing all categories and news in local storage
+void NewsReader::index_local(char *root_file_path){
+	// Initialize root index
+	NewsReader::root_index.name = "Mục lục chính";
+	NewsReader::root_index.path = string(root_file_path);
+	fillCategory(&root_index);
+}
+
+// Indexing news from tuoitre.vn
 void NewsReader::index_online(void){
 	html_t html;
 	update_link();
@@ -116,6 +141,7 @@ void NewsReader::index_online(void){
 	}while(!ifsIndex.eof());
 }
 
+// Run vnsr script and read result
 unsigned int NewsReader::getVoiceCmd(int option){
 	Sound::play("/media/SD/iheartech-tts/database/beep_start.wav");
 	if(option == 1) {
@@ -139,48 +165,50 @@ unsigned int NewsReader::getVoiceCmd(int option){
 	return 0;
 }
 
-/*
- * Run news reader program
- */
+// Run news reader program in offline mode
 void NewsReader::run_local(TTS *tts){
-	//Read categories list;
-	int i = 1;
+	// Read categories list;
 	unsigned int choice_category;
 	unsigned int choice_news;
-	vector<index_t>::iterator it;
-	tts->sayText("Chào bạn, đây là chương trình đọc báo điện tử. Các chuyên mục hiện có gồm");
-	cout << "Các chuyên mục hiện có: " << endl;
-	for(it = categories.begin(); it != categories.end(); it++){
-		cout << i << ". " << it->name << endl;
-		tts->sayText((it->name).c_str());
-		i++;
+	category_t *head = &NewsReader::root_index;
+	vector<category_t>::iterator it_head;
+	tts->sayText("Chào bạn, đây là chương trình đọc báo điện tử.");
+	while(head->subcategory.size() > 0){
+		tts->sayText((string(head->name) + " gồm có các chuyên mục sau").c_str());
+		cout << head->name <<" gồm các chuyên mục:" << endl;
+		int i = 1;
+		for(it_head = head->subcategory.begin();
+				it_head != head->subcategory.end(); it_head++){
+			cout << i++ << ". " << it_head->name << endl;
+			tts->sayText(it_head->name.c_str());
+		}
+		tts->sayText("Bạn muốn chọn chuyên mục nào");
+		cout << "Chọn chuyên mục số: " << endl;
+		// Select voice command input or terminal input
+		if(enable_voice_cmd){
+			do{
+				choice_category = NewsReader::getVoiceCmd(1) - 5;
+			}while(choice_category > head->subcategory.size());
+		} else{
+			do{
+				scanf("%d",&choice_category);
+			}while(choice_category > head->subcategory.size());
+		}
+		choice_category --;
+		cout << "Bạn đã chọn chuyên mục " << head->subcategory[choice_category].name << endl;
+		tts->sayText(("Bạn đã chọn chuyên mục " + head->subcategory[choice_category].name).c_str());
+		head = &(head->subcategory[choice_category]);
 	}
-	tts->sayText("Bạn muốn chọn chuyên mục nào");
-	cout << "Chọn chuyên mục số: " << endl;
-	/*
-	 * Select voice command input or terminal input
-	 */
-	if(enable_voice_cmd){
-		do{
-			choice_category = NewsReader::getVoiceCmd(1) - 5;
-		}while(choice_category > categories.size());
-	} else{
-		do{
-			scanf("%d",&choice_category);
-		}while(choice_category > categories.size());
-	}
-	cout << "Bạn đã chọn chuyên mục số: " << choice_category << endl;
-	choice_category --;
-	tts->sayText(("Bạn đã chọn chuyên mục " + categories[choice_category].name).c_str());
-	tts->sayText(("Chuyên mục " + categories[choice_category].name + " gồm có các tin sau").c_str());
+
+	tts->sayText(("Chuyên mục " + head->name + " gồm có các tin sau").c_str());
 	cout << "Danh mục tin tức:" << endl;
-	vector<html_t>::iterator it_html;
-	i = 1;
+	vector<news_t>::iterator it_html;
+	int i = 1;
 	char numstr[32];
-	for(it_html = categories[choice_category].list.begin(); it_html != categories[choice_category].list.end(); it_html++){
-		cout << i << ". " << it_html->title << endl;
+	for(it_html = head->news_list.begin(); it_html != head->news_list.end(); it_html++){
+		cout << i << ". " << it_html->name << endl;
 		snprintf(numstr, 32, "Tin số %d. ", i);
-		tts->sayText((std::string(numstr) + it_html->title).c_str());
+		tts->sayText((std::string(numstr) + it_html->name).c_str());
 		i++;
 	}
 	tts->sayText("Bạn muốn chọn tin số mấy");
@@ -188,21 +216,24 @@ void NewsReader::run_local(TTS *tts){
 	if(enable_voice_cmd){
 		do{
 			choice_news = NewsReader::getVoiceCmd(2);
-		}while(choice_news > categories[choice_category].list.size());
+		}while(choice_news > head->news_list.size());
 	} else{
 		do{
 			scanf("%d", &choice_news);
 			cout << "Bạn đã chọn tin số: " << choice_news << endl;
-		}while(choice_news > categories[choice_category].list.size());
+		}while(choice_news > head->news_list.size());
 	}
 	choice_news --;
-	tts->sayText(("Bạn đã chọn tin. " + categories[choice_category].list[choice_news].title).c_str());
-	tts->sayText(categories[choice_category].list[choice_news].body.c_str());
+	tts->sayText(("Bạn đã chọn tin. " + head->news_list[choice_news].name).c_str());
+	html_t html_file;
+	HtmlParser::process(&html_file, head->news_list[choice_news].path.c_str());
+	tts->sayText(html_file.body.c_str());
 }
 
+// Run news reader in online mode
 void NewsReader::run_online(TTS *tts){
 	DEBUG_INFO("Running news reader in online mode");
-	//Read categories list;
+	// Read categories list;
 	int i = 1;
 	unsigned int choice_category;
 	unsigned int choice_news;
@@ -216,9 +247,8 @@ void NewsReader::run_online(TTS *tts){
 	}
 	tts->sayText("Bạn muốn chọn chuyên mục nào");
 	cout << "Chọn chuyên mục số: " << endl;
-	/*
-	 * Select voice command input or terminal input
-	 */
+
+	// Select voice command input or terminal input
 	if(enable_voice_cmd){
 		do{
 			choice_category = NewsReader::getVoiceCmd(1) - 5;

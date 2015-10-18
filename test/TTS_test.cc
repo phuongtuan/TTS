@@ -5,12 +5,11 @@
  *      Author: messier
  */
 #define TTS_VERSION_MAJOR       1
-#define TTS_VERSION_MINOR       1
+#define TTS_VERSION_MINOR       2
 #define TTS_VERSION_SUBMINOR    0
 
 #include "TTS.h"
 #include "debug.h"
-#include "TTS.h"
 #include "Sound.h"
 #include "NewsReader.h"
 #include <getopt.h>
@@ -38,6 +37,7 @@ void initializeComponent(){
 	DEBUG_INIT();
 }
 
+// Print usage
 void print_help(){
 	printf("Usage: TTS [OPTION]... [FILE|URL]...\n"
 			"-h, --help              help\n"
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]){
 		else printf("Run news reader with terminal input\n");
 		if(news_reader_mode == 0){
 			printf("Run news reader in local mode\n");
-			NewsReader::index_local();
+			NewsReader::index_local((char *)"/var/www/html/");
 			NewsReader::run_local(&tts);
 		}else{
 			printf("Run news reader in online mode\n");

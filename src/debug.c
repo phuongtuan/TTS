@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "config.h"
+#include "time.h"
 // Comment out to disable debug when compile code
 #define CONFIG_FILE_RELATIVE_PATH	"/config/logtrace.conf"
-#define LOG_BUFFER_SIZE	1024
-
+#define LOG_BUFFER_SIZE		1024
+#define TIME_BUFFER_SIZE	128
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
 #define KGRN  "\x1B[32m"
@@ -86,8 +87,7 @@ void tts_debug_init(){
 #endif
 }
 
-void tts_log(const char *date, const char *time, const char *severity,
-		const char *file, const char *func, const int line,...){
+void tts_log(const char *severity, const char *file, const char *func, const int line,...){
 #ifdef __DEBUG__
 	if(DEBUG_ENABLE){
 		FILE *log_file = fopen(LOG_FILE_PATH, "a");
@@ -95,12 +95,18 @@ void tts_log(const char *date, const char *time, const char *severity,
 		va_start (args, line);
 		char *msg = va_arg(args,char*);
 		char *buffer = (char *)calloc(LOG_BUFFER_SIZE, sizeof(char));
-		sprintf(buffer, "[%s %s] %s %s::%s::%i	%s\n", date, time, severity,
+		char *time_buffer = (char *)calloc(TIME_BUFFER_SIZE, sizeof(char));
+		time_t now = time(0);
+		struct tm tstruct;
+		tstruct = *localtime(&now);
+		strftime(time_buffer, TIME_BUFFER_SIZE, "%d-%m-%Y %X", &tstruct);
+		sprintf(buffer, "[%s] %-5s %-25s%-25s%-5i %s\n", time_buffer, severity,
 				file, func, line, msg);
 		vfprintf(log_file, buffer, args);
 		fclose(log_file);
 		va_end(args);
 		free(buffer);
+		free(time_buffer);
 	}
 #endif
 }
