@@ -82,11 +82,10 @@ int NewsReader::fillCategory(category_t *cat){
 	xml_node<> *root_node;
 	xml.parse<0>(&buffer[0]);
 	root_node = xml.first_node("category");
-	category_t sub_category;
-	news_t news;
 	// Iterate over sub-category
 	for(xml_node<> *sub_category_node = root_node->first_node("category");
 			sub_category_node; sub_category_node = sub_category_node->next_sibling()){
+		category_t sub_category;
 		sub_category.name = string(sub_category_node->first_attribute("name")->value());
 		sub_category.path = string(sub_category_node->first_attribute("path")->value());
 		// Recursion call
@@ -96,6 +95,7 @@ int NewsReader::fillCategory(category_t *cat){
 	// Iterate over news
 	for(xml_node<> *news_node = root_node->first_node("news");
 			news_node; news_node = news_node->next_sibling()){
+		news_t news;
 		news.name = string(news_node->first_attribute("name")->value());
 		news.path = string(news_node->first_attribute("path")->value());
 		cat->news_list.push_back(news);

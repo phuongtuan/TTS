@@ -6,7 +6,7 @@
  */
 #define TTS_VERSION_MAJOR       1
 #define TTS_VERSION_MINOR       2
-#define TTS_VERSION_SUBMINOR    0
+#define TTS_VERSION_SUBMINOR    1
 
 #include "TTS.h"
 #include "debug.h"
