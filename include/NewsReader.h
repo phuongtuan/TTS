@@ -24,6 +24,7 @@ struct index_t {
 	string name;						// Name of category (which is spoken during category selection)
 	string path;						// Local path on the machine
 	string keyword;						// Keyword to search in the index.html page
+	string vnsr_keyword;
 	vector<html_t> list;				// Vector contains news list (html format)
 };
 
@@ -35,13 +36,14 @@ struct news_t {
 struct category_t {
 	string name;
 	string path;
+	string vnsr_keyword;
 	vector<category_t> subcategory;
 	vector<news_t> news_list;
 };
 
 struct cmd_t {
 	string keyword;
-	unsigned int index;
+	int index;
 };
 
 class NewsReader {
@@ -53,10 +55,12 @@ public:
 	static void index_online();
 	static vector<index_t> categories;
 	static category_t root_index;
-	static vector<cmd_t> cmdList;
+	static vector<cmd_t> cmdNumber;
+	static vector<cmd_t> cmdList_online;
 	static void run_local(TTS *tts);
 	static void run_online(TTS *tts);
-	static unsigned int getVoiceCmd(int option);
+	static unsigned int getVoiceCmd(int option, category_t *cat = NULL);
+	static unsigned int getVoiceCmd_online(int option);
 	static bool enable_voice_cmd;
 private:
 	static void splitString(std::vector<std::string> *tokens, const std::string *s, char delim);
