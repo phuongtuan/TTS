@@ -181,10 +181,10 @@ unsigned int NewsReader::getVoiceCmd_online(int option){
 
 // Run vnsr script and read result
 unsigned int NewsReader::getVoiceCmd(int option, category_t *cat){
-	Sound::play("/media/SD/iheartech-tts/database/beep_start.wav");
+	Sound::play("../database/beep_start.wav");
 	if(option == 1) {
-		system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
-		std::ifstream ifs("/media/SD/iheartech-tts/vcmd_result");
+		//system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
+		std::ifstream ifs("../vnsr_result.txt");
 		std::string cmd_str((std::istreambuf_iterator<char>(ifs)),
 				(std::istreambuf_iterator<char>()));
 		if(cmd_str.find("bor") != string::npos) return -1;
@@ -204,8 +204,8 @@ unsigned int NewsReader::getVoiceCmd(int option, category_t *cat){
 			}
 		}
 	}else if (option == 2){
-		system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao_lan2.sh;cd -");
-		std::ifstream ifs("/media/SD/iheartech-tts/vcmd_result");
+		//system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao_lan2.sh;cd -");
+		std::ifstream ifs("../vnsr_result.txt");
 		std::string cmd_str((std::istreambuf_iterator<char>(ifs)),
 				(std::istreambuf_iterator<char>()));
 		vector<cmd_t>::iterator it;
@@ -246,9 +246,14 @@ void NewsReader::run_local(TTS *tts){
 			// Select voice command input or terminal input
 			if(enable_voice_cmd){
 				do{
+					system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
 					choice_category = NewsReader::getVoiceCmd(1, head);
 					// Command == 'bor qua' -> return
-					if(choice_category == -1) return;
+					if(choice_category == -1){
+						cout << "Chương trình kết thúc" << endl;
+						tts->sayText("Chương trình kết thúc");
+						return;
+					}
 				}while(choice_category > (signed)head->subcategory.size());
 			} else{
 				do{
@@ -275,6 +280,7 @@ void NewsReader::run_local(TTS *tts){
 		cout << "Bạn chọn tin số: " << endl;
 		if(enable_voice_cmd){
 			do{
+				system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao_lan2.sh;cd -");
 				choice_news = NewsReader::getVoiceCmd(2);
 			}while(choice_news > head->news_list.size());
 		} else{
@@ -293,6 +299,7 @@ void NewsReader::run_local(TTS *tts){
 		int choice;
 		if(enable_voice_cmd){
 			do{
+				system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_nha_thong_minh.sh;cd -");
 				choice = NewsReader::getVoiceCmd(2);
 				if(choice == -1){
 					tts->sayText("Bạn đã chọn tiếp tục");
