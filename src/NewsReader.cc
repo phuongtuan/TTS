@@ -181,10 +181,8 @@ unsigned int NewsReader::getVoiceCmd_online(int option){
 
 // Run vnsr script and read result
 unsigned int NewsReader::getVoiceCmd(int option, category_t *cat){
-	Sound::play("/media/SD/iheartech-tts/database/beep_start.wav");
 	if(option == 1) {
-		system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
-		std::ifstream ifs("/media/SD/iheartech-tts/vcmd_result");
+		std::ifstream ifs("../vnsr_result.txt");
 		std::string cmd_str((std::istreambuf_iterator<char>(ifs)),
 				(std::istreambuf_iterator<char>()));
 		if(cmd_str.find("bor") != string::npos) return -1;
@@ -204,8 +202,7 @@ unsigned int NewsReader::getVoiceCmd(int option, category_t *cat){
 			}
 		}
 	}else if (option == 2){
-		system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao_lan2.sh;cd -");
-		std::ifstream ifs("/media/SD/iheartech-tts/vcmd_result");
+		std::ifstream ifs("../vnsr_result.txt");
 		std::string cmd_str((std::istreambuf_iterator<char>(ifs)),
 				(std::istreambuf_iterator<char>()));
 		vector<cmd_t>::iterator it;
@@ -219,7 +216,7 @@ unsigned int NewsReader::getVoiceCmd(int option, category_t *cat){
 			}
 		}
 	}
-	return 0;
+	return -10;
 }
 
 // Run news reader program in offline mode
@@ -229,7 +226,7 @@ void NewsReader::run_local(TTS *tts){
 	bool cont = false;
 	do {
 		int choice_category;
-		unsigned int choice_news;
+		int choice_news;
 		vector<category_t>::iterator it_head;
 		category_t *head = &NewsReader::root_index;
 		while(head->subcategory.size() > 0){
@@ -246,10 +243,13 @@ void NewsReader::run_local(TTS *tts){
 			// Select voice command input or terminal input
 			if(enable_voice_cmd){
 				do{
+					system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
 					choice_category = NewsReader::getVoiceCmd(1, head);
 					// Command == 'bor qua' -> return
 					if(choice_category == -1) return;
-				}while(choice_category > (signed)head->subcategory.size());
+					if(choice_category == -10) tts->sayText("Xin lỗi, bạn vui lòng đọc lại");
+				}while((choice_category > (signed)head->subcategory.size())||
+						(choice_category < 0));
 			} else{
 				do{
 					scanf("%d",&choice_category);
@@ -275,13 +275,21 @@ void NewsReader::run_local(TTS *tts){
 		cout << "Bạn chọn tin số: " << endl;
 		if(enable_voice_cmd){
 			do{
+				system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao_lan2.sh;cd -");
 				choice_news = NewsReader::getVoiceCmd(2);
-			}while(choice_news > head->news_list.size());
+				// "tooi muoosn duwfng
+				if(choice_news == -2){
+					tts->sayText("Bạn đã chọn dừng. Chương trình kết thúc");
+					return;
+				}
+				if(choice_news == -10) tts->sayText("Xin lỗi, bạn vui lòng đọc lại");
+			}while((choice_news > (signed)head->news_list.size())||
+					(choice_news < 0));
 		} else{
 			do{
 				scanf("%d", &choice_news);
 				cout << "Bạn đã chọn tin số: " << choice_news << endl;
-			}while(choice_news > head->news_list.size());
+			}while(choice_news > (signed)head->news_list.size());
 		}
 		choice_news --;
 		tts->sayText(("Bạn đã chọn tin. " + head->news_list[choice_news].name).c_str());
@@ -293,6 +301,7 @@ void NewsReader::run_local(TTS *tts){
 		int choice;
 		if(enable_voice_cmd){
 			do{
+				system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_nha_thong_minh.sh;cd -");
 				choice = NewsReader::getVoiceCmd(2);
 				if(choice == -1){
 					tts->sayText("Bạn đã chọn tiếp tục");
