@@ -229,6 +229,7 @@ void NewsReader::run_local(TTS *tts){
 		int choice_news;
 		vector<category_t>::iterator it_head;
 		category_t *head = &NewsReader::root_index;
+
 		while(head->subcategory.size() > 0){
 			tts->sayText((string(head->name) + " gồm có các chuyên mục sau").c_str());
 			cout << head->name <<" gồm các chuyên mục:" << endl;
@@ -241,9 +242,11 @@ void NewsReader::run_local(TTS *tts){
 			tts->sayText("Bạn muốn chọn chuyên mục nào");
 			cout << "Chọn chuyên mục số: " << endl;
 			// Select voice command input or terminal input
+			int head_count = 0;
 			if(enable_voice_cmd){
 				do{
-					system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
+					if(head_count == 0) system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
+					else if(head_count == 1) system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao_lan3.sh;cd -");
 					choice_category = NewsReader::getVoiceCmd(1, head);
 					// Command == 'bor qua' -> return
 					if(choice_category == -1){
@@ -262,6 +265,7 @@ void NewsReader::run_local(TTS *tts){
 			cout << "Bạn đã chọn chuyên mục " << head->subcategory[choice_category].name << endl;
 			tts->sayText(("Bạn đã chọn chuyên mục " + head->subcategory[choice_category].name).c_str());
 			head = &(head->subcategory[choice_category]);
+			head_count++;
 		}
 		tts->sayText(("Chuyên mục " + head->name + " gồm có các tin sau").c_str());
 		cout << "Danh mục tin tức:" << endl;
@@ -304,7 +308,7 @@ void NewsReader::run_local(TTS *tts){
 		int choice;
 		if(enable_voice_cmd){
 			do{
-				system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_nha_thong_minh.sh;cd -");
+				system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao_lan4.sh;cd -");
 				choice = NewsReader::getVoiceCmd(2);
 				if(choice == -1){
 					tts->sayText("Bạn đã chọn tiếp tục");
