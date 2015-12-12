@@ -1,0 +1,11 @@
+<!-- Auto generated index.xml, do not edit -->
+<?xml version="1.0" encoding="UTF-8"?>
+<category name="Nông nghiệp" path="../Demo/news/nong_nghiep" vnsr_keyword="noong +nghieejp">
+	<category name="Tin về cá" path="../Demo/news/nong_nghiep/ca" vnsr_keyword="cas"/>
+	<category name="Tin về vịt" path="../Demo/news/nong_nghiep/vit" vnsr_keyword="vijt"/>
+	<category name="Tin về heo" path="../Demo/news/nong_nghiep/heo" vnsr_keyword="heo"/>
+	<category name="Tin về gà" path="../Demo/news/nong_nghiep/ga" vnsr_keyword="gaf"/>
+	<category name="Tin về hoa" path="../Demo/news/nong_nghiep/hoa" vnsr_keyword="hoa"/>
+	<category name="Tin về cây" path="../Demo/news/nong_nghiep/cay" vnsr_keyword="caay"/>
+</category>
+

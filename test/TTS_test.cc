@@ -160,7 +160,7 @@ int main(int argc, char* argv[]){
 		else printf("Run news reader with terminal input\n");
 		if(news_reader_mode == 0){
 			printf("Run news reader in local mode\n");
-			NewsReader::index_local((char *)"/var/www/html/");
+			NewsReader::index_local((char *)"../Demo/news/");
 			NewsReader::run_local(&tts);
 		}else{
 			printf("Run news reader in online mode\n");
