@@ -10,7 +10,8 @@ messages
 *.nml
 news.txt
 index.txt
-*.html
+news.html
+tuoitre.html
 .project
 .cproject
 bin/
