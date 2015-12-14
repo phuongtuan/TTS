@@ -230,7 +230,7 @@ void NewsReader::run_local(TTS *tts){
 		int choice_news;
 		vector<category_t>::iterator it_head;
 		category_t *head = &NewsReader::root_index;
-
+		int head_count = 0;
 		while(head->subcategory.size() > 0){
 			tts->sayText((string(head->name) + " gồm có các chuyên mục sau").c_str());
 			cout << head->name <<" gồm các chuyên mục:" << endl;
@@ -243,7 +243,6 @@ void NewsReader::run_local(TTS *tts){
 			tts->sayText("Bạn muốn chọn chuyên mục nào");
 			cout << "Chọn chuyên mục số: " << endl;
 			// Select voice command input or terminal input
-			int head_count = 0;
 			if(enable_voice_cmd){
 				do{
 					if(head_count == 0) system("cd /home/ubuntu/hoang/vnsr_direction-build-desktop;./vnsr_doc_bao.sh;cd -");
