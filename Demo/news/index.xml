@@ -5,7 +5,7 @@
 	<category name="Lịch sử" path="../Demo/news/lich_su" vnsr_keyword="lijch +suwr"/>
 	<category name="Văn hóa" path="../Demo/news/van_hoa" vnsr_keyword="vawn +hoas"/>
 	<category name="Nông nghiệp" path="../Demo/news/nong_nghiep" vnsr_keyword="noong +nghieejp"/>
-	<category name="Sức khỏe" path="../Demo/news/suc_khoe" vnsr_keyword="suwcs +khoer"/>
+	<category name="Sức khỏe" path="../Demo/news/suc_khoe" vnsr_keyword="suwsc +khoer"/>
 	<category name="Khoa học" path="../Demo/news/khoa_hoc" vnsr_keyword="khoa +hojc"/>
 </category>
 

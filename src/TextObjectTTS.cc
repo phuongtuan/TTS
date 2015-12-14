@@ -16,7 +16,8 @@ const char *TextObjectTTS::kh[] = {"", "NGÀN ", "TRIỆU ", "TỶ ", "NGÀN T�
 // CAUTION: This type of declaration can only be compiled with c++11 flag *
 //*************************************************************************
 std::vector<pattern_t> TextObjectTTS::regexPattern = {
-		{(char *)"(“|”|<.*?>|\302\240|\342\200\246|[.][.])", &normalize_rmhtml},
+		// Some multi-byte characters is invisible, please don't erase
+		{(char *)"(“|”|<.*?>|&AMP|\302\240|\342\200\246|​|[.][.])", &normalize_rmhtml},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})-([[:digit:]]{1,2})-([[:digit:]]{4}) ?", &normalize_date_1},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})/([[:digit:]]{1,2})/([[:digit:]]{4}) ?", &normalize_date_1},
 		{(char *)"(NGÀY )?([[:digit:]]{1,2})[.]([[:digit:]]{1,2})[.]([[:digit:]]{4}) ?", &normalize_date_1},
@@ -25,6 +26,7 @@ std::vector<pattern_t> TextObjectTTS::regexPattern = {
 		{(char *)"(THÁNG )?([[:digit:]]{1,2})(\\.|-|\\/)([[:digit:]]{4}) ?", &normalize_date_4},
 		{(char *)"(NGÀY |SÁNG |TRƯA |CHIỀU |TỐI |ĐÊM |KHUYA |HAI |BA |TƯ |NĂM |SÁU |BẢY |NHẬT |QUA |NAY )([[:digit:]]{1,2})[\\.\\/-]([[:digit:]]{1,2}) ?", &normalize_date_5},
 		{(char *)"(THỨ |HẠNG |GIẢI )([[:digit:]]+)",&normalize_rank},
+		{(char *)"([[:digit:]]+) ?(KM/H|M/S)", &normalize_speed},
 		{(char *)"([[:digit:]]{1,2})(H|G|:)([[:digit:]]{1,2})?( AM| PM)? ?", &normalize_time},
 		{(char *)"([[:digit:]]+)[ ]?(KG|G|MG|KM|M|CM|MM|UM|NM|HA)(2|3)?[ |.|,|:|;]", &normalize_size},
 		{(char *)"([[:digit:]]+) O C",&normalize_degree},
@@ -250,6 +252,19 @@ std::string* TextObjectTTS::normalize_date_5(std::string *src, regmatch_t *pmatc
 	temp.append(*normalize_number(&num_string, num));
 	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, temp);
 	DEBUG_INFO("Normalized string is %s", temp.c_str());
+	return src;
+}
+
+std::string* TextObjectTTS::normalize_speed(std::string *src, regmatch_t *pmatch){
+	DEBUG_INFO("normalized_speed is called");
+	std::string num_string;
+	int num;
+	num = atoi(src->c_str() + pmatch[1].rm_so);
+	std::string temp;
+	temp.append(*normalize_number(&num_string, num));
+	if(*(src->c_str() + pmatch[2].rm_so) == 'K') temp.append("KI LÔ MÉT TRÊN GIỜ ");
+	else temp.append("MÉT TRÊN GIÂY ");
+	src->replace(pmatch[0].rm_so, pmatch[0].rm_eo - pmatch[0].rm_so, temp);
 	return src;
 }
 

@@ -214,6 +214,7 @@ void UnitSelector::createIdList(std::string str){
 				phrase.erase(phrase.length()-1,1);
 				id = 0;
 				if(!phrase.empty()){
+					DEBUG_INFO("Search phrase %s in dictionary", phrase.c_str());
 					if((id = this->unitIdMap[phrase]) != 0){
 						itw += i;
 						break;
@@ -435,6 +436,10 @@ void UnitSelector::searchPhrase(std::string phrase){
 					break;
 				}
 			}
+		}
+		if(id == 0){
+			DEBUG_WARNING("Cannot find phrase %s in dictionary",phrase.c_str());
+			it++;
 		}
 	}
 }

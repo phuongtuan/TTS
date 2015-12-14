@@ -31,6 +31,7 @@ vector<index_t> NewsReader::categories = {
 		{"Văn hóa giải trí", "/var/www/html/van-hoa-giai-tri/", "http://tuoitre.vn/tin/van-hoa-giai-tri", "vawn +hoas +dari +tris"},
 		{"Kinh tế", "/var/www/html/kinh-te/", "http://tuoitre.vn/tin/kinh-te", "kinh +tees"},
 		{"Thế giới", "/var/www/html/the-gioi/", "http://tuoitre.vn/tin/the-gioi", "thees +dowsi"},
+		//{"Giáo dục", "/var/www/html/giao-duc/", "http://tuoitre.vn/tin/giao-duc", "giaso +dujc"},
 };
 
 category_t NewsReader::root_index;
@@ -354,7 +355,7 @@ void NewsReader::run_online(TTS *tts){
 	// Select voice command input or terminal input
 	if(enable_voice_cmd){
 		do{
-			choice_category = NewsReader::getVoiceCmd(1) - 5;
+			choice_category = NewsReader::getVoiceCmd_online(1) - 5;
 		}while(choice_category > categories.size());
 	} else{
 		do{
@@ -379,7 +380,7 @@ void NewsReader::run_online(TTS *tts){
 	cout << "Bạn chọn tin số: " << endl;
 	if(enable_voice_cmd){
 		do{
-			choice_news = NewsReader::getVoiceCmd(2);
+			choice_news = NewsReader::getVoiceCmd_online(2);
 		}while(choice_news > categories[choice_category].list.size());
 	} else{
 		do{
